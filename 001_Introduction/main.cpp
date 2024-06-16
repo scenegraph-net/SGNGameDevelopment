@@ -2,31 +2,26 @@
 #include <windows.h>
 
 #include <string>
-#include <vector>
-#include <memory>
 
 #include "WindowClass.h"
-#include "DrawingSurface.h"
+#include "MainWindow.h"
 
 static float g_time = .0f;
-static std::unique_ptr<DrawingSurface> g_surface;
 
 
-void DrawToWindow(HWND windowHandle)
+void DrawToWindow(MainWindow& window)
 {
-   RECT clientRect;
-   PAINTSTRUCT paintStruct;
-
    // Calculate displacements
    constexpr float AMPLITUDE = 100.f;
    constexpr float TIMESCALE = .25f;
    const int displacement1 = static_cast<int>(AMPLITUDE + sin(g_time * TIMESCALE) * AMPLITUDE);
    const int displacement2 = static_cast<int>(AMPLITUDE + cos(g_time * TIMESCALE) * AMPLITUDE);
 
-   HDC deviceContext = g_surface->GetDeviceContext();
+   HDC deviceContext = window.GetSurface().GetDeviceContext();
 
    // Draw white background
-   GetClientRect(windowHandle, &clientRect);
+   RECT clientRect;
+   window.GetClientArea(clientRect);
    FillRect(deviceContext, &clientRect, static_cast<HBRUSH>(WHITE_BRUSH));
 
    // Draw outlined shapes
@@ -46,19 +41,16 @@ void DrawToWindow(HWND windowHandle)
    SelectObject(deviceContext, oldBrush);
    DeleteObject(blueBrush);
 
-   // Get the title of the window
-   size_t titleLength = GetWindowTextLength(windowHandle);
-   std::vector<char> windowTitle(titleLength + 1);
-   GetWindowText(windowHandle, windowTitle.data(), static_cast<int>(titleLength + 1));
-
    // Create a font and use it for drawing the window title
    HFONT textFont = CreateFont(32, 20, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS,
       CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Arial");
 
    HFONT oldFont = static_cast<HFONT>(SelectObject(deviceContext, textFont));
 
+   std::string windowTitle = window.GetTitle();
+
    RECT textLocalRect;
-   DrawText(deviceContext, windowTitle.data(), static_cast<int>(windowTitle.size()), &textLocalRect, DT_CALCRECT);
+   DrawText(deviceContext, windowTitle.c_str(), static_cast<int>(windowTitle.length()), &textLocalRect, DT_CALCRECT);
 
    int textWidth = textLocalRect.right - textLocalRect.left;
    int textHeight = textLocalRect.bottom - textLocalRect.top;
@@ -69,24 +61,23 @@ void DrawToWindow(HWND windowHandle)
    textDrawRect.top = 450 + displacement2;
    textDrawRect.bottom = 450 + textHeight + displacement2;
 
-   DrawText(deviceContext, windowTitle.data(), static_cast<int>(windowTitle.size()), &textDrawRect, DT_CENTER);
+   DrawText(deviceContext, windowTitle.c_str(), static_cast<int>(windowTitle.length()), &textDrawRect, DT_CENTER);
 
    SelectObject(deviceContext, oldFont);
    DeleteObject(textFont);
 
-   // Copy the back buffer into the window
-   HDC windowDeviceContext = BeginPaint(windowHandle, &paintStruct);
-   g_surface->Present(windowDeviceContext);
-   EndPaint(windowHandle, &paintStruct);
+   window.Present();
 }
 
 
 LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
 {
+   MainWindow& window = *reinterpret_cast<MainWindow*>(GetWindowLongPtr(windowHandle, GWLP_USERDATA));
+
    switch (message)
    {
       case WM_PAINT:
-         DrawToWindow(windowHandle);
+         DrawToWindow(window);
          return 0;
       case WM_ERASEBKGND:
          return TRUE;
@@ -95,9 +86,13 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPAR
          InvalidateRect(windowHandle, nullptr, TRUE);
          return 0;
       case WM_SIZE:
-         g_surface->CreateBackBuffer(LOWORD(lParam), HIWORD(lParam));
+         window.Resize(LOWORD(lParam), HIWORD(lParam));
+         return 0;
+      case WM_CREATE:
+         SetWindowLongPtr(windowHandle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(new MainWindow(windowHandle)));
          return 0;
       case WM_DESTROY:
+         delete reinterpret_cast<MainWindow*>(GetWindowLongPtr(windowHandle, GWLP_USERDATA));
          PostQuitMessage(0);
          return 0;
    }
@@ -119,21 +114,19 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
       return 0;
    }
 
-   HWND mainWindow = CreateWindow(windowClassName.c_str(), mainWindowTitle.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
+   HWND mainWindowHandle = CreateWindow(windowClassName.c_str(), mainWindowTitle.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
       CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, nullptr, nullptr, instance, nullptr);
 
-   if (nullptr == mainWindow)
+   if (nullptr == mainWindowHandle)
    {
       MessageBox(nullptr, "Unable to create main window", "Error", MB_OK);
       return 0;
    }
 
-   g_surface = std::make_unique<DrawingSurface>(mainWindow);
+   ShowWindow(mainWindowHandle, showMode);
+   UpdateWindow(mainWindowHandle);
 
-   ShowWindow(mainWindow, showMode);
-   UpdateWindow(mainWindow);
-
-   SetTimer(mainWindow, 0, 20, nullptr);
+   SetTimer(mainWindowHandle, 0, 20, nullptr);
 
    MSG message;
 
