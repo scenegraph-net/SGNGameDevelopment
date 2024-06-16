@@ -1,5 +1,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <windowsx.h>
 
 #include <string>
 
@@ -8,6 +9,7 @@
 #include "HiResTimer.h"
 
 static double g_time = .0f;
+static POINT g_mousePosition{ };
 
 
 void DrawToWindow(MainWindow& window)
@@ -39,7 +41,18 @@ void DrawToWindow(MainWindow& window)
    HBRUSH blueBrush = CreateHatchBrush(HS_DIAGCROSS, RGB(0, 0, 255));
    HBRUSH oldBrush = static_cast<HBRUSH>(SelectObject(deviceContext, blueBrush));
    Ellipse(deviceContext, 180 + displacement2, 170, 400 + displacement2, 300);
+
+   // Draw a circle that follows the mouse pointer
+   constexpr int RADIUS = 15;
+   HBRUSH greenBrush = CreateSolidBrush(RGB(0, 255, 0));
+   SelectObject(deviceContext, greenBrush);
+
+   Ellipse(deviceContext, g_mousePosition.x - RADIUS, g_mousePosition.y - RADIUS,
+      g_mousePosition.x + RADIUS, g_mousePosition.y + RADIUS);
+
+   // Clean up the brushes
    SelectObject(deviceContext, oldBrush);
+   DeleteObject(greenBrush);
    DeleteObject(blueBrush);
 
    // Create a font and use it for drawing the window title
@@ -77,6 +90,10 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPAR
 
    switch (message)
    {
+      case WM_MOUSEMOVE:
+         g_mousePosition.x = GET_X_LPARAM(lParam);
+         g_mousePosition.y = GET_Y_LPARAM(lParam);
+         return 0;
       case WM_PAINT:
          DrawToWindow(window);
          return 0;
