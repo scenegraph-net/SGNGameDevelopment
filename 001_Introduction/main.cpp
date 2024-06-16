@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 
+#include "WindowClass.h"
+
+
 static float g_time = .0f;
 
 static HDC g_backBufferDeviceContext = nullptr;
@@ -142,16 +145,9 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
    const std::string windowClassName = "SGNGameDev";
    const std::string mainWindowTitle = "SGN Game Development application";
 
-   WNDCLASSEX windowClass{ };
-   windowClass.cbSize = sizeof(WNDCLASSEX);
-   windowClass.style = CS_HREDRAW | CS_VREDRAW;
-   windowClass.lpfnWndProc = static_cast<WNDPROC>(WindowProc);
-   windowClass.hInstance = instance;
-   windowClass.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
-   windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
-   windowClass.lpszClassName = windowClassName.c_str();
+   WindowClass windowClass(instance, windowClassName, WindowProc);
 
-   if (!RegisterClassEx(&windowClass))
+   if (!windowClass.Register())
    {
       MessageBox(nullptr, "Unable to register window class", "Error", MB_OK);
       return 0;
