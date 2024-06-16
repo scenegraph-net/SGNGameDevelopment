@@ -5,15 +5,16 @@
 
 #include "WindowClass.h"
 #include "MainWindow.h"
+#include "HiResTimer.h"
 
-static float g_time = .0f;
+static double g_time = .0f;
 
 
 void DrawToWindow(MainWindow& window)
 {
    // Calculate displacements
-   constexpr float AMPLITUDE = 100.f;
-   constexpr float TIMESCALE = .25f;
+   constexpr double AMPLITUDE = 100.f;
+   constexpr double TIMESCALE = 2.25f;
    const int displacement1 = static_cast<int>(AMPLITUDE + sin(g_time * TIMESCALE) * AMPLITUDE);
    const int displacement2 = static_cast<int>(AMPLITUDE + cos(g_time * TIMESCALE) * AMPLITUDE);
 
@@ -81,10 +82,6 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPAR
          return 0;
       case WM_ERASEBKGND:
          return TRUE;
-      case WM_TIMER:
-         g_time += .4f;
-         InvalidateRect(windowHandle, nullptr, TRUE);
-         return 0;
       case WM_SIZE:
          window.Resize(LOWORD(lParam), HIWORD(lParam));
          return 0;
@@ -126,15 +123,26 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
    ShowWindow(mainWindowHandle, showMode);
    UpdateWindow(mainWindowHandle);
 
-   SetTimer(mainWindowHandle, 0, 20, nullptr);
-
    MSG message;
+   HiResTimer timer;
+   int returnValue = INT_MIN;
 
-   while (GetMessage(&message, nullptr, 0, 0))
+   while (INT_MIN == returnValue)
    {
-      TranslateMessage(&message);
-      DispatchMessage(&message);
+      if (PeekMessage(&message, nullptr, 0, 0, PM_REMOVE))
+      {
+         if (message.message == WM_QUIT)
+            returnValue = static_cast<int>(message.wParam);
+
+         TranslateMessage(&message);
+         DispatchMessage(&message);
+      }
+      else
+      {
+         g_time = timer.GetElapsed();
+         RedrawWindow(mainWindowHandle, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);
+      }
    }
 
-   return static_cast<int>(message.wParam);
+   return returnValue;
 }
