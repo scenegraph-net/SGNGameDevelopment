@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DrawingSurface.cpp" />
+    <ClCompile Include="DrawManager.cpp" />
     <ClCompile Include="HiResTimer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
@@ -139,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DrawingSurface.h" />
+    <ClInclude Include="DrawManager.h" />
     <ClInclude Include="HiResTimer.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="WindowClass.h" />

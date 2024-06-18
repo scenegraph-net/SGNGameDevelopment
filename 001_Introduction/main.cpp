@@ -2,86 +2,15 @@
 #include <windows.h>
 #include <windowsx.h>
 
+#include <memory>
 #include <string>
 
 #include "WindowClass.h"
 #include "MainWindow.h"
-#include "HiResTimer.h"
-
-static double g_time = .0f;
-static POINT g_mousePosition{ };
+#include "DrawManager.h"
 
 
-void DrawToWindow(MainWindow& window)
-{
-   // Calculate displacements
-   constexpr double AMPLITUDE = 100.f;
-   constexpr double TIMESCALE = 2.25f;
-   const int displacement1 = static_cast<int>(AMPLITUDE + sin(g_time * TIMESCALE) * AMPLITUDE);
-   const int displacement2 = static_cast<int>(AMPLITUDE + cos(g_time * TIMESCALE) * AMPLITUDE);
-
-   HDC deviceContext = window.GetSurface().GetDeviceContext();
-
-   // Draw white background
-   RECT clientRect;
-   window.GetClientArea(clientRect);
-   FillRect(deviceContext, &clientRect, static_cast<HBRUSH>(WHITE_BRUSH));
-
-   // Draw outlined shapes
-   Rectangle(deviceContext, 20 + displacement1, 20, 150 + displacement1, 150);
-   Ellipse(deviceContext, 180 + displacement1, 20, 400 + displacement1, 150);
-
-   // Draw a filled rectangle
-   HBRUSH redBrush = CreateSolidBrush(RGB(255, 0, 0));
-   RECT redRectangle{ 20 + displacement2, 170, 150 + displacement2, 300 };
-   FillRect(deviceContext, &redRectangle, redBrush);
-   DeleteObject(redBrush);
-
-   // Draw a filled ellipse
-   HBRUSH blueBrush = CreateHatchBrush(HS_DIAGCROSS, RGB(0, 0, 255));
-   HBRUSH oldBrush = static_cast<HBRUSH>(SelectObject(deviceContext, blueBrush));
-   Ellipse(deviceContext, 180 + displacement2, 170, 400 + displacement2, 300);
-
-   // Draw a circle that follows the mouse pointer
-   constexpr int RADIUS = 15;
-   HBRUSH greenBrush = CreateSolidBrush(RGB(0, 255, 0));
-   SelectObject(deviceContext, greenBrush);
-
-   Ellipse(deviceContext, g_mousePosition.x - RADIUS, g_mousePosition.y - RADIUS,
-      g_mousePosition.x + RADIUS, g_mousePosition.y + RADIUS);
-
-   // Clean up the brushes
-   SelectObject(deviceContext, oldBrush);
-   DeleteObject(greenBrush);
-   DeleteObject(blueBrush);
-
-   // Create a font and use it for drawing the window title
-   HFONT textFont = CreateFont(32, 20, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS,
-      CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Arial");
-
-   HFONT oldFont = static_cast<HFONT>(SelectObject(deviceContext, textFont));
-
-   std::string windowTitle = window.GetTitle();
-
-   RECT textLocalRect;
-   DrawText(deviceContext, windowTitle.c_str(), static_cast<int>(windowTitle.length()), &textLocalRect, DT_CALCRECT);
-
-   int textWidth = textLocalRect.right - textLocalRect.left;
-   int textHeight = textLocalRect.bottom - textLocalRect.top;
-
-   RECT textDrawRect;
-   textDrawRect.left = 20 + displacement1;
-   textDrawRect.right = 20 + textWidth + displacement1;
-   textDrawRect.top = 450 + displacement2;
-   textDrawRect.bottom = 450 + textHeight + displacement2;
-
-   DrawText(deviceContext, windowTitle.c_str(), static_cast<int>(windowTitle.length()), &textDrawRect, DT_CENTER);
-
-   SelectObject(deviceContext, oldFont);
-   DeleteObject(textFont);
-
-   window.Present();
-}
+static std::unique_ptr<DrawManager> g_drawManager;
 
 
 LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
@@ -91,11 +20,10 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPAR
    switch (message)
    {
       case WM_MOUSEMOVE:
-         g_mousePosition.x = GET_X_LPARAM(lParam);
-         g_mousePosition.y = GET_Y_LPARAM(lParam);
+         g_drawManager->SetMousePosition(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
          return 0;
       case WM_PAINT:
-         DrawToWindow(window);
+         g_drawManager->Draw(window);
          return 0;
       case WM_ERASEBKGND:
          return TRUE;
@@ -137,11 +65,12 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
       return 0;
    }
 
+   g_drawManager = std::make_unique<DrawManager>();
+
    ShowWindow(mainWindowHandle, showMode);
    UpdateWindow(mainWindowHandle);
 
    MSG message;
-   HiResTimer timer;
    int returnValue = INT_MIN;
 
    while (INT_MIN == returnValue)
@@ -156,7 +85,6 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
       }
       else
       {
-         g_time = timer.GetElapsed();
          RedrawWindow(mainWindowHandle, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);
       }
    }
