@@ -33,6 +33,7 @@ class DrawManager
 
       HFONT TextFont;
 
+      HBITMAP BackgroundBitmap;
       HBITMAP SpriteBitmap;
 };
 

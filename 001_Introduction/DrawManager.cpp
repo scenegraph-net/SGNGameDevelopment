@@ -14,6 +14,7 @@ DrawManager::DrawManager()
       CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Arial");
 
    SpriteBitmap = static_cast<HBITMAP>(LoadImage(nullptr, "assets\\woodwall.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE));
+   BackgroundBitmap = static_cast<HBITMAP>(LoadImage(nullptr, "assets\\background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE));
 }
 
 
@@ -24,6 +25,7 @@ DrawManager::~DrawManager()
    DeleteObject(GreenSolidBrush);
    DeleteObject(TextFont);
    DeleteObject(SpriteBitmap);
+   DeleteObject(BackgroundBitmap);
 }
 
 
@@ -46,10 +48,20 @@ void DrawManager::Draw(MainWindow& window)
 
    HDC deviceContext = window.GetSurface().GetDeviceContext();
 
-   // Draw white background
+   // Draw background image
    RECT clientRect;
    window.GetClientArea(clientRect);
-   FillRect(deviceContext, &clientRect, static_cast<HBRUSH>(WHITE_BRUSH));
+
+   BITMAP backgroundBitmap;
+   HDC backgroundBitmapContext = CreateCompatibleDC(deviceContext);
+   HANDLE oldBackgroundBitmap = SelectObject(backgroundBitmapContext, BackgroundBitmap);
+   GetObject(BackgroundBitmap, sizeof(BITMAP), &backgroundBitmap);
+
+   StretchBlt(deviceContext, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, 
+      backgroundBitmapContext, 0, 0, backgroundBitmap.bmWidth, backgroundBitmap.bmHeight, SRCCOPY);
+
+   SelectObject(backgroundBitmapContext, oldBackgroundBitmap);
+   DeleteDC(backgroundBitmapContext);
 
    // Draw outlined shapes
    Rectangle(deviceContext, 20 + displacement1, 20, 150 + displacement1, 150);
