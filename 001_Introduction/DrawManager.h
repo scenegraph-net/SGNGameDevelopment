@@ -32,5 +32,7 @@ class DrawManager
       HBRUSH GreenSolidBrush;
 
       HFONT TextFont;
+
+      HBITMAP SpriteBitmap;
 };
 

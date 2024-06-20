@@ -12,6 +12,8 @@ DrawManager::DrawManager()
 
    TextFont = CreateFont(32, 20, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS,
       CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Arial");
+
+   SpriteBitmap = static_cast<HBITMAP>(LoadImage(nullptr, "assets\\woodwall.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE));
 }
 
 
@@ -21,6 +23,7 @@ DrawManager::~DrawManager()
    DeleteObject(BlueHatchBrush);
    DeleteObject(GreenSolidBrush);
    DeleteObject(TextFont);
+   DeleteObject(SpriteBitmap);
 }
 
 
@@ -89,6 +92,15 @@ void DrawManager::Draw(MainWindow& window)
    DrawText(deviceContext, windowTitle.c_str(), static_cast<int>(windowTitle.length()), &textDrawRect, DT_CENTER);
 
    SelectObject(deviceContext, oldFont);
+
+   // Draw the loaded bitmap
+   BITMAP bitmap;
+   HDC bitmapContext = CreateCompatibleDC(deviceContext);
+   HANDLE oldBitmap = SelectObject(bitmapContext, SpriteBitmap);
+   GetObject(SpriteBitmap, sizeof(BITMAP), &bitmap);
+   StretchBlt(deviceContext, MousePosition.x, MousePosition.y, 100, 100, bitmapContext, 0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
+   SelectObject(bitmapContext, oldBitmap);
+   DeleteDC(bitmapContext);
 
    window.Present();
 }
