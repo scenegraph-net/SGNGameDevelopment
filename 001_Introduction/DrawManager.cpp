@@ -64,6 +64,7 @@ void DrawManager::Draw(MainWindow& window)
    DeleteDC(backgroundBitmapContext);
 
    // Draw outlined shapes
+   HBRUSH oldBrush = static_cast<HBRUSH>(SelectObject(deviceContext, GetStockObject(NULL_BRUSH)));
    Rectangle(deviceContext, 20 + displacement1, 20, 150 + displacement1, 150);
    Ellipse(deviceContext, 180 + displacement1, 20, 400 + displacement1, 150);
 
@@ -72,7 +73,7 @@ void DrawManager::Draw(MainWindow& window)
    FillRect(deviceContext, &redRectangle, RedSolidBrush);
 
    // Draw a filled ellipse
-   HBRUSH oldBrush = static_cast<HBRUSH>(SelectObject(deviceContext, BlueHatchBrush));
+   SelectObject(deviceContext, BlueHatchBrush);
    Ellipse(deviceContext, 180 + displacement2, 170, 400 + displacement2, 300);
 
    // Draw a circle that follows the mouse pointer
@@ -101,7 +102,9 @@ void DrawManager::Draw(MainWindow& window)
    textDrawRect.top = 450 + displacement2;
    textDrawRect.bottom = 450 + textHeight + displacement2;
 
+   int oldBackgroundMode = SetBkMode(deviceContext, TRANSPARENT);
    DrawText(deviceContext, windowTitle.c_str(), static_cast<int>(windowTitle.length()), &textDrawRect, DT_CENTER);
+   SetBkMode(deviceContext, oldBackgroundMode);
 
    SelectObject(deviceContext, oldFont);
 
