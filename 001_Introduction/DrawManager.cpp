@@ -13,8 +13,8 @@ DrawManager::DrawManager()
    TextFont = CreateFont(32, 20, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS,
       CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Arial");
 
-   SpriteBitmap = static_cast<HBITMAP>(LoadImage(nullptr, "assets\\woodwall.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE));
-   BackgroundBitmap = static_cast<HBITMAP>(LoadImage(nullptr, "assets\\background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE));
+   SpriteBitmap.LoadFromFile("assets\\woodwall.bmp");
+   BackgroundBitmap.LoadFromFile("assets\\background.bmp");
 }
 
 
@@ -24,8 +24,6 @@ DrawManager::~DrawManager()
    DeleteObject(BlueHatchBrush);
    DeleteObject(GreenSolidBrush);
    DeleteObject(TextFont);
-   DeleteObject(SpriteBitmap);
-   DeleteObject(BackgroundBitmap);
 }
 
 
@@ -51,17 +49,7 @@ void DrawManager::Draw(MainWindow& window)
    // Draw background image
    RECT clientRect;
    window.GetClientArea(clientRect);
-
-   BITMAP backgroundBitmap;
-   HDC backgroundBitmapContext = CreateCompatibleDC(deviceContext);
-   HANDLE oldBackgroundBitmap = SelectObject(backgroundBitmapContext, BackgroundBitmap);
-   GetObject(BackgroundBitmap, sizeof(BITMAP), &backgroundBitmap);
-
-   StretchBlt(deviceContext, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, 
-      backgroundBitmapContext, 0, 0, backgroundBitmap.bmWidth, backgroundBitmap.bmHeight, SRCCOPY);
-
-   SelectObject(backgroundBitmapContext, oldBackgroundBitmap);
-   DeleteDC(backgroundBitmapContext);
+   BackgroundBitmap.Stretch(deviceContext, clientRect);
 
    // Draw outlined shapes
    HBRUSH oldBrush = static_cast<HBRUSH>(SelectObject(deviceContext, GetStockObject(NULL_BRUSH)));
@@ -108,14 +96,9 @@ void DrawManager::Draw(MainWindow& window)
 
    SelectObject(deviceContext, oldFont);
 
-   // Draw the loaded bitmap
-   BITMAP bitmap;
-   HDC bitmapContext = CreateCompatibleDC(deviceContext);
-   HANDLE oldBitmap = SelectObject(bitmapContext, SpriteBitmap);
-   GetObject(SpriteBitmap, sizeof(BITMAP), &bitmap);
-   StretchBlt(deviceContext, MousePosition.x, MousePosition.y, 100, 100, bitmapContext, 0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
-   SelectObject(bitmapContext, oldBitmap);
-   DeleteDC(bitmapContext);
+   // Draw the sprite
+   RECT spriteRectangle{ MousePosition.x, MousePosition.y, MousePosition.x + 100, MousePosition.y + 100 };
+   SpriteBitmap.Stretch(deviceContext, spriteRectangle);
 
    window.Present();
 }

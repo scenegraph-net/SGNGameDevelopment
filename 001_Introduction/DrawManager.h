@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include "HiResTimer.h"
+#include "BitmapImage.h"
 
 class MainWindow;
 
@@ -33,7 +34,7 @@ class DrawManager
 
       HFONT TextFont;
 
-      HBITMAP BackgroundBitmap;
-      HBITMAP SpriteBitmap;
+      BitmapImage BackgroundBitmap;
+      BitmapImage SpriteBitmap;
 };
 
