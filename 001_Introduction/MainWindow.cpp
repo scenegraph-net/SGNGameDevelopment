@@ -38,8 +38,7 @@ void MainWindow::Resize(unsigned short width, unsigned short height)
 
 void MainWindow::Present()
 {
-   PAINTSTRUCT paintStruct;
-   HDC windowDeviceContext = BeginPaint(WindowHandle, &paintStruct);
+   HDC windowDeviceContext = GetDC(WindowHandle);
    Surface.Present(windowDeviceContext);
-   EndPaint(WindowHandle, &paintStruct);
+   ReleaseDC(WindowHandle, windowDeviceContext);
 }

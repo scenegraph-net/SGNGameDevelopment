@@ -22,11 +22,6 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPAR
       case WM_MOUSEMOVE:
          g_drawManager->SetMousePosition(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
          return 0;
-      case WM_PAINT:
-         g_drawManager->Draw(window);
-         return 0;
-      case WM_ERASEBKGND:
-         return TRUE;
       case WM_SIZE:
          window.Resize(LOWORD(lParam), HIWORD(lParam));
          return 0;
@@ -85,7 +80,8 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
       }
       else
       {
-         RedrawWindow(mainWindowHandle, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);
+         MainWindow& window = *reinterpret_cast<MainWindow*>(GetWindowLongPtr(mainWindowHandle, GWLP_USERDATA));
+         g_drawManager->Draw(window);
       }
    }
 
