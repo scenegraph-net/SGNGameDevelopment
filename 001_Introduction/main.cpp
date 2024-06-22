@@ -65,7 +65,7 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
       return 0;
    }
 
-   g_drawManager = std::make_unique<DrawManager>();
+   g_drawManager = std::make_unique<DrawManager>(instance);
 
    ShowWindow(mainWindowHandle, showMode);
    UpdateWindow(mainWindowHandle);

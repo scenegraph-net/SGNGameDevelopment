@@ -11,7 +11,7 @@ class MainWindow;
 class DrawManager
 {
    public:
-      DrawManager();
+      DrawManager(HINSTANCE instance);
       ~DrawManager();
 
       DrawManager(const DrawManager& other) = delete;

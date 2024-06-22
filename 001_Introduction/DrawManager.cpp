@@ -3,8 +3,10 @@
 #include "MainWindow.h"
 #include <cmath>
 
+#include "resource.h"
 
-DrawManager::DrawManager()
+
+DrawManager::DrawManager(HINSTANCE instance)
 {
    RedSolidBrush = CreateSolidBrush(RGB(255, 0, 0));
    BlueHatchBrush = CreateHatchBrush(HS_DIAGCROSS, RGB(0, 0, 255));
@@ -13,8 +15,8 @@ DrawManager::DrawManager()
    TextFont = CreateFont(32, 20, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS,
       CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Arial");
 
-   SpriteBitmap.LoadFromFile("assets\\woodwall.bmp");
-   BackgroundBitmap.LoadFromFile("assets\\background.bmp");
+   SpriteBitmap.LoadFromResource(instance, IDB_BITMAP_WOODWALL);
+   BackgroundBitmap.LoadFromResource(instance, IDB_BITMAP_BACKGROUND);
 }
 
 

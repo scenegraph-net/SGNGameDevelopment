@@ -145,7 +145,15 @@
     <ClInclude Include="DrawManager.h" />
     <ClInclude Include="HiResTimer.h" />
     <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="WindowClass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="001_Introduction.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\background.bmp" />
+    <Image Include="assets\woodwall.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

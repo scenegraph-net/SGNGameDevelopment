@@ -16,7 +16,20 @@ BitmapImage::~BitmapImage()
 bool BitmapImage::LoadFromFile(const std::string& filePath)
 {
    Bitmap = static_cast<HBITMAP>(LoadImage(nullptr, filePath.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE));
+   return UpdateBitmapInfo();
+}
 
+
+
+bool BitmapImage::LoadFromResource(HINSTANCE instance, int resourceId)
+{
+   Bitmap = static_cast<HBITMAP>(LoadBitmap(instance, MAKEINTRESOURCE(resourceId)));
+   return UpdateBitmapInfo();
+}
+
+
+bool BitmapImage::UpdateBitmapInfo()
+{
    if (nullptr == Bitmap)
       return false;
 

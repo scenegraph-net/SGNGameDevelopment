@@ -17,6 +17,7 @@ class BitmapImage
       BitmapImage& operator=(BitmapImage&& other) = delete;
 
       bool LoadFromFile(const std::string& filePath);
+      bool LoadFromResource(HINSTANCE instance, int resourceId);
 
       void Stretch(HDC deviceContext, const RECT& rectangle) const;
 
@@ -24,4 +25,6 @@ class BitmapImage
       HBITMAP Bitmap;
       LONG Width;
       LONG Height;
+
+      bool UpdateBitmapInfo();
 };
