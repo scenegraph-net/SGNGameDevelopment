@@ -9,8 +9,13 @@
 #include "MainWindow.h"
 #include "DrawManager.h"
 
+#include <mmsystem.h>
+
+#include "resource.h"
+
 
 static std::unique_ptr<DrawManager> g_drawManager;
+static HINSTANCE g_instance = nullptr;
 
 
 LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
@@ -21,6 +26,9 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPAR
    {
       case WM_MOUSEMOVE:
          g_drawManager->SetMousePosition(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+         return 0;
+      case WM_LBUTTONUP:
+         PlaySound(reinterpret_cast<LPCSTR>(IDR_WAVE_MOUSECLICK), g_instance, SND_RESOURCE | SND_ASYNC);
          return 0;
       case WM_SIZE:
          window.Resize(LOWORD(lParam), HIWORD(lParam));
@@ -40,6 +48,8 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPAR
 
 int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLine, int showMode)
 {
+   g_instance = instance;
+
    const std::string windowClassName = "SGNGameDev";
    const std::string mainWindowTitle = "SGN Game Development application";
 
