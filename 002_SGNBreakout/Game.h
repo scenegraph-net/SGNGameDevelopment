@@ -12,7 +12,6 @@ class Game
 
       void SetMousePosition(unsigned short x, unsigned short y);
 
-      void ResizeWindow(unsigned short width, unsigned short height);
       void Update();
 
    private:
