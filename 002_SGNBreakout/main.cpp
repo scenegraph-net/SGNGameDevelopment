@@ -16,9 +16,6 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPAR
       case WM_MOUSEMOVE:
          game.SetMousePosition(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
          return 0;
-      case WM_SIZE:
-         game.ResizeWindow(LOWORD(lParam), HIWORD(lParam));
-         return 0;
       case WM_DESTROY:
          PostQuitMessage(0);
          return 0;
@@ -30,6 +27,10 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPAR
 
 int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLine, int showMode)
 {
+   constexpr int MAIN_WINDOW_WIDTH = 1024;
+   constexpr int MAIN_WINDOW_HEIGHT = 576;
+   constexpr DWORD MAIN_WINDOW_STYLE = WS_OVERLAPPEDWINDOW ^ (WS_THICKFRAME | WS_MAXIMIZEBOX);
+
    const std::string windowClassName = "SGNBreakout";
    const std::string mainWindowTitle = "SGNBreakout - a clone of the classic game";
 
@@ -41,8 +42,12 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
       return 0;
    }
 
-   HWND mainWindowHandle = CreateWindow(windowClassName.c_str(), mainWindowTitle.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
-      CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, nullptr, nullptr, instance, nullptr);
+   RECT windowRectangle{ 0, 0, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT };
+   AdjustWindowRect(&windowRectangle, MAIN_WINDOW_STYLE, FALSE);
+
+   HWND mainWindowHandle = CreateWindow(windowClassName.c_str(), mainWindowTitle.c_str(), MAIN_WINDOW_STYLE, CW_USEDEFAULT,
+      CW_USEDEFAULT, windowRectangle.right - windowRectangle.left, windowRectangle.bottom - windowRectangle.top, nullptr, 
+      nullptr, instance, nullptr);
 
    if (nullptr == mainWindowHandle)
    {
