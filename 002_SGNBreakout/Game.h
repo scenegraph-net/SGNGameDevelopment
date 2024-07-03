@@ -1,8 +1,11 @@
 #pragma once
 
+#include <vector>
+
 #include <windows.h>
 
 #include "DrawingSurface.h"
+#include "GameEntities.h"
 
 
 class Game
@@ -10,7 +13,7 @@ class Game
    public:
       Game(HWND windowHandle);
 
-      void SetMousePosition(unsigned short x, unsigned short y);
+      void SetMousePosition(int x, int y);
 
       void Update();
 
@@ -18,4 +21,6 @@ class Game
       HWND WindowHandle;
       POINT MousePosition;
       DrawingSurface Surface;
+
+      std::vector<Brick> Bricks;
 };
