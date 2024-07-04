@@ -134,6 +134,7 @@
     <ClCompile Include="DrawingSurface.cpp" />
     <ClCompile Include="DrawManager.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="HiResTimer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="WindowClass.cpp" />
   </ItemGroup>
@@ -142,6 +143,7 @@
     <ClInclude Include="DrawingSurface.h" />
     <ClInclude Include="DrawManager.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="HiResTimer.h" />
     <ClInclude Include="WindowClass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

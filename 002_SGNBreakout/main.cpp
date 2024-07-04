@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "HiResTimer.h"
 #include "WindowClass.h"
 #include "Game.h"
 
@@ -61,6 +62,9 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
    ShowWindow(mainWindowHandle, showMode);
    UpdateWindow(mainWindowHandle);
 
+   HiResTimer timer;
+   double previousTime = timer.GetElapsed();
+
    MSG message;
    int returnValue = INT_MIN;
 
@@ -76,7 +80,9 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
       }
       else
       {
-         game.Update();
+         double elapsedTime = timer.GetElapsed();
+         game.Update(elapsedTime - previousTime);
+         previousTime = elapsedTime;
       }
    }
 

@@ -28,3 +28,14 @@ void DrawManager::DrawPaddle(HDC deviceContext, const RECT& extent)
    FillRect(deviceContext, &extent, yellowBrush);
    DeleteObject(yellowBrush);
 }
+
+
+void DrawManager::DrawBall(HDC deviceContext, const POINTFLOAT& ballPosition)
+{
+   Ellipse(deviceContext, 
+      static_cast<LONG>(ballPosition.x - BALL_RADIUS),
+      static_cast<LONG>(ballPosition.y - BALL_RADIUS),
+      static_cast<LONG>(ballPosition.x + BALL_RADIUS),
+      static_cast<LONG>(ballPosition.y + BALL_RADIUS)
+   );
+}
