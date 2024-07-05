@@ -4,10 +4,34 @@
 #include "GameEntities.h"
 
 
-Game::Game(HWND windowHandle)
-   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), BallPosition({ 200.f, 400.f }),
-   BallVelocity({ 150.f, 130.f })
+static constexpr int WINDOW_LEFT_MARGIN = 24;
+static constexpr int WINDOW_TOP_MARGIN = 24;
+
+static constexpr int PLAYING_FIELD_WIDTH = 720;
+static constexpr int PLAYING_FIELD_HEIGHT = 528;
+
+static constexpr RECT BALL_AREA =
 {
+   static_cast<LONG>(WINDOW_LEFT_MARGIN + Ball::RADIUS),
+   static_cast<LONG>(WINDOW_TOP_MARGIN + Ball::RADIUS),
+   static_cast<LONG>(WINDOW_LEFT_MARGIN + PLAYING_FIELD_WIDTH - Ball::RADIUS),
+   static_cast<LONG>(WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT - Ball::RADIUS)
+};
+
+
+Game::Game(HWND windowHandle)
+   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ })
+{
+   PlayerBall.Position = { 200.f, 400.f };
+   PlayerBall.Velocity = { 150.f, 150.f };
+
+   PlayerPaddle.PositionX = 0;
+
+   PlayerPaddle.Extent = {
+      0, WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT - Paddle::HEIGHT,
+      0, WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT
+   };
+
    std::vector<COLORREF> colors = { RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255),
       RGB(0, 255, 255), RGB(127, 127, 127), RGB(255, 0, 255), RGB(255, 255, 0) };
 
@@ -29,68 +53,60 @@ void Game::Update(double frameTime)
    RECT clientRectangle;
    GetClientRect(WindowHandle, &clientRectangle);
 
-   constexpr int PADDLE_WIDTH = 96;
-   constexpr int PADDLE_HEIGHT = 24;
-
-   constexpr int LEFT_MARGIN = 24;
-   constexpr int TOP_MARGIN = 24;
-   
-   constexpr int PLAYING_FIELD_WIDTH = 720;
-   constexpr int PLAYING_FIELD_HEIGHT = 528;
-
-   const RECT ballArea{
-      LEFT_MARGIN + BALL_RADIUS,
-      TOP_MARGIN + BALL_RADIUS,
-      LEFT_MARGIN + PLAYING_FIELD_WIDTH - BALL_RADIUS,
-      TOP_MARGIN + PLAYING_FIELD_HEIGHT - BALL_RADIUS
-   };
-
-   const int paddlePosition = min(max(0, MousePosition.x), PLAYING_FIELD_WIDTH - PADDLE_WIDTH);
-   
-   const RECT paddleExtent{
-      LEFT_MARGIN + paddlePosition,
-      TOP_MARGIN + PLAYING_FIELD_HEIGHT - PADDLE_HEIGHT,
-      LEFT_MARGIN + paddlePosition + PADDLE_WIDTH,
-      TOP_MARGIN + PLAYING_FIELD_HEIGHT
-   };
+   UpdateGameState(frameTime);
 
    HDC surfaceContext = Surface.GetDeviceContext();
    DrawManager::DrawBackground(surfaceContext, clientRectangle);
-   DrawManager::DrawPaddle(surfaceContext, paddleExtent);
-   
-   for (const auto& brick : Bricks)
-      DrawManager::DrawBrick(surfaceContext, brick);
-
-   BallPosition.x += static_cast<FLOAT>(BallVelocity.x * frameTime);
-   BallPosition.y += static_cast<FLOAT>(BallVelocity.y * frameTime);
-
-   if (BallPosition.x < ballArea.left)
-   {
-      BallPosition.x = ballArea.left;
-      BallVelocity.x *= -1.f;
-   }
-
-   if (BallPosition.x >= ballArea.right)
-   {
-      BallPosition.x = ballArea.right - 1;
-      BallVelocity.x *= -1.f;
-   }
-
-   if (BallPosition.y < ballArea.top)
-   {
-      BallPosition.y = ballArea.top;
-      BallVelocity.y *= -1.f;
-   }
-
-   if (BallPosition.y >= ballArea.bottom)
-   {
-      BallPosition.y = ballArea.bottom - 1;
-      BallVelocity.y *= -1.f;
-   }
-
-   DrawManager::DrawBall(surfaceContext, BallPosition);
+   DrawGameEntities(surfaceContext);
 
    HDC deviceContext = GetDC(WindowHandle);
    Surface.Present(deviceContext);
    ReleaseDC(WindowHandle, deviceContext);
+}
+
+
+void Game::UpdateGameState(double frameTime)
+{
+   const int paddlePosition = std::min(std::max(0, static_cast<int>(MousePosition.x)), PLAYING_FIELD_WIDTH - Paddle::WIDTH);
+
+   PlayerPaddle.Extent.left = WINDOW_LEFT_MARGIN + paddlePosition;
+   PlayerPaddle.Extent.right = WINDOW_LEFT_MARGIN + paddlePosition + Paddle::WIDTH;
+
+   PlayerBall.Position.x += static_cast<FLOAT>(PlayerBall.Velocity.x * frameTime);
+   PlayerBall.Position.y += static_cast<FLOAT>(PlayerBall.Velocity.y * frameTime);
+
+   if (PlayerBall.Position.x < BALL_AREA.left)
+   {
+      PlayerBall.Position.x = static_cast<FLOAT>(BALL_AREA.left);
+      PlayerBall.Velocity.x *= -1.f;
+   }
+
+   if (PlayerBall.Position.x >= BALL_AREA.right)
+   {
+      PlayerBall.Position.x = static_cast<FLOAT>(BALL_AREA.right - 1);
+      PlayerBall.Velocity.x *= -1.f;
+   }
+
+   if (PlayerBall.Position.y < BALL_AREA.top)
+   {
+      PlayerBall.Position.y = static_cast<FLOAT>(BALL_AREA.top);
+      PlayerBall.Velocity.y *= -1.f;
+   }
+
+   if (PlayerBall.Position.y >= BALL_AREA.bottom)
+   {
+      PlayerBall.Position.y = static_cast<FLOAT>(BALL_AREA.bottom - 1);
+      PlayerBall.Velocity.y *= -1.f;
+   }
+}
+
+
+void Game::DrawGameEntities(HDC surfaceContext)
+{
+   DrawManager::DrawPaddle(surfaceContext, PlayerPaddle);
+
+   for (const auto& brick : Bricks)
+      DrawManager::DrawBrick(surfaceContext, brick);
+
+   DrawManager::DrawBall(surfaceContext, PlayerBall.Position);
 }
