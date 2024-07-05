@@ -22,10 +22,10 @@ void DrawManager::DrawBrick(HDC deviceContext, const Brick& brick)
 }
 
 
-void DrawManager::DrawPaddle(HDC deviceContext, const RECT& extent)
+void DrawManager::DrawPaddle(HDC deviceContext, const Paddle& paddle)
 {
    HBRUSH yellowBrush = CreateSolidBrush(RGB(255, 255, 0));
-   FillRect(deviceContext, &extent, yellowBrush);
+   FillRect(deviceContext, &paddle.Extent, yellowBrush);
    DeleteObject(yellowBrush);
 }
 
@@ -33,9 +33,9 @@ void DrawManager::DrawPaddle(HDC deviceContext, const RECT& extent)
 void DrawManager::DrawBall(HDC deviceContext, const POINTFLOAT& ballPosition)
 {
    Ellipse(deviceContext, 
-      static_cast<LONG>(ballPosition.x - BALL_RADIUS),
-      static_cast<LONG>(ballPosition.y - BALL_RADIUS),
-      static_cast<LONG>(ballPosition.x + BALL_RADIUS),
-      static_cast<LONG>(ballPosition.y + BALL_RADIUS)
+      static_cast<LONG>(ballPosition.x - Ball::RADIUS),
+      static_cast<LONG>(ballPosition.y - Ball::RADIUS),
+      static_cast<LONG>(ballPosition.x + Ball::RADIUS),
+      static_cast<LONG>(ballPosition.y + Ball::RADIUS)
    );
 }

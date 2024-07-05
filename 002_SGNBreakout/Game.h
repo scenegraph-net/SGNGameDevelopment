@@ -22,8 +22,10 @@ class Game
       POINT MousePosition;
       DrawingSurface Surface;
 
-      POINTFLOAT BallPosition;
-      POINTFLOAT BallVelocity;
-
       std::vector<Brick> Bricks;
+      Paddle PlayerPaddle;
+      Ball PlayerBall;
+
+      void UpdateGameState(double frameTime);
+      void DrawGameEntities(HDC surfaceContext);
 };
