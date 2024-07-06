@@ -139,6 +139,7 @@
     <ClCompile Include="WindowClass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="GameEntities.h" />
     <ClInclude Include="DrawingSurface.h" />
     <ClInclude Include="DrawManager.h" />

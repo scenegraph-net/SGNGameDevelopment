@@ -6,6 +6,7 @@
 
 #include "DrawingSurface.h"
 #include "GameEntities.h"
+#include "Collision.h"
 
 
 class Game
@@ -28,4 +29,12 @@ class Game
 
       void UpdateGameState(double frameTime);
       void DrawGameEntities(HDC surfaceContext);
+
+      void CheckForWallCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const;
+      void CheckForBrickCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const;
+      void CheckForPaddleCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const;
+
+      void HandleImpact(const Collision& impact);
+
+      static double Length(const POINTFLOAT& vector);
 };
