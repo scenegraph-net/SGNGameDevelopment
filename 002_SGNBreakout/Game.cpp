@@ -1,7 +1,8 @@
 #include "Game.h"
-#include "DrawManager.h"
 
-#include "GameEntities.h"
+#include <algorithm>
+
+#include "DrawManager.h"
 
 
 static constexpr int WINDOW_LEFT_MARGIN = 24;
@@ -72,31 +73,35 @@ void Game::UpdateGameState(double frameTime)
    PlayerPaddle.Extent.left = WINDOW_LEFT_MARGIN + paddlePosition;
    PlayerPaddle.Extent.right = WINDOW_LEFT_MARGIN + paddlePosition + Paddle::WIDTH;
 
-   PlayerBall.Position.x += static_cast<FLOAT>(PlayerBall.Velocity.x * frameTime);
-   PlayerBall.Position.y += static_cast<FLOAT>(PlayerBall.Velocity.y * frameTime);
+   double remainingTime = frameTime;
+   std::vector<Collision> collisions;
 
-   if (PlayerBall.Position.x < BALL_AREA.left)
+   while (remainingTime > .0)
    {
-      PlayerBall.Position.x = static_cast<FLOAT>(BALL_AREA.left);
-      PlayerBall.Velocity.x *= -1.f;
-   }
+      POINTFLOAT newBallPosition = {
+         PlayerBall.Position.x + static_cast<FLOAT>(PlayerBall.Velocity.x * remainingTime),
+         PlayerBall.Position.y + static_cast<FLOAT>(PlayerBall.Velocity.y * remainingTime)
+      };
 
-   if (PlayerBall.Position.x >= BALL_AREA.right)
-   {
-      PlayerBall.Position.x = static_cast<FLOAT>(BALL_AREA.right - 1);
-      PlayerBall.Velocity.x *= -1.f;
-   }
+      CheckForWallCollisions(collisions, newBallPosition);
+      CheckForBrickCollisions(collisions, newBallPosition);
+      CheckForPaddleCollisions(collisions, newBallPosition);
 
-   if (PlayerBall.Position.y < BALL_AREA.top)
-   {
-      PlayerBall.Position.y = static_cast<FLOAT>(BALL_AREA.top);
-      PlayerBall.Velocity.y *= -1.f;
-   }
+      if (collisions.empty())
+      {
+         PlayerBall.Position = newBallPosition;
+         break;
+      }
 
-   if (PlayerBall.Position.y >= BALL_AREA.bottom)
-   {
-      PlayerBall.Position.y = static_cast<FLOAT>(BALL_AREA.bottom - 1);
-      PlayerBall.Velocity.y *= -1.f;
+      std::sort(collisions.begin(), collisions.end(),
+         [](const Collision& c1, const Collision& c2) { return c1.ImpactTime < c2.ImpactTime; });
+
+      const Collision& impact = collisions.front();
+      PlayerBall.Position.x += static_cast<FLOAT>(PlayerBall.Velocity.x * impact.ImpactTime * remainingTime);
+      PlayerBall.Position.y += static_cast<FLOAT>(PlayerBall.Velocity.y * impact.ImpactTime * remainingTime);
+      remainingTime -= impact.ImpactTime;
+
+      HandleImpact(impact);
    }
 }
 
@@ -109,4 +114,79 @@ void Game::DrawGameEntities(HDC surfaceContext)
       DrawManager::DrawBrick(surfaceContext, brick);
 
    DrawManager::DrawBall(surfaceContext, PlayerBall.Position);
+}
+
+
+void Game::CheckForWallCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const
+{
+   if (PlayerBall.Velocity.x < .0)
+   {
+      if (newBallPosition.x < BALL_AREA.left)
+      {
+         const double impactTime = (PlayerBall.Position.x - BALL_AREA.left) / (PlayerBall.Position.x - newBallPosition.x);
+         collisions.emplace_back(CollisionType::Wall, CollisionSide::Left, impactTime);
+      }
+   }
+   else
+   {
+      if (newBallPosition.x >= BALL_AREA.right)
+      {
+         const double impactTime = (BALL_AREA.right - PlayerBall.Position.x) / (newBallPosition.x - PlayerBall.Position.x);
+         collisions.emplace_back(CollisionType::Wall, CollisionSide::Right, impactTime);
+      }
+   }
+
+   if (PlayerBall.Velocity.y < .0)
+   {
+      if (newBallPosition.y < BALL_AREA.top)
+      {
+         double impactTime = (PlayerBall.Position.y - BALL_AREA.top) / (PlayerBall.Position.y - newBallPosition.y);
+         collisions.emplace_back(CollisionType::Wall, CollisionSide::Top, impactTime);
+      }
+   }
+   else
+   {
+      if (newBallPosition.y >= BALL_AREA.bottom)
+      {
+         double impactTime = (BALL_AREA.bottom - PlayerBall.Position.y) / (newBallPosition.y - PlayerBall.Position.y);
+         collisions.emplace_back(CollisionType::Wall, CollisionSide::Bottom, impactTime);
+      }
+   }
+}
+
+
+void Game::CheckForBrickCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const
+{
+   // Do nothing for now
+}
+
+
+void Game::CheckForPaddleCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const
+{
+   // Do nothing for now
+}
+
+
+void Game::HandleImpact(const Collision& impact)
+{
+   switch (impact.Type)
+   {
+      case CollisionType::Wall:
+         switch (impact.Side)
+         {
+            case CollisionSide::Left:
+            case CollisionSide::Right:
+               PlayerBall.Velocity.x *= -1.;
+               break;
+            case CollisionSide::Top:
+            case CollisionSide::Bottom:
+               PlayerBall.Velocity.y *= -1.;
+               break;
+         }
+
+         break;
+      default:
+         // Do nothing for now
+         break;
+   }
 }
