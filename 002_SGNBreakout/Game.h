@@ -30,9 +30,9 @@ class Game
       void UpdateGameState(double frameTime);
       void DrawGameEntities(HDC surfaceContext);
 
-      void CheckForWallCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const;
-      void CheckForBrickCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const;
-      void CheckForPaddleCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const;
+      void CheckForWallCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const;
+      void CheckForBrickCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const;
+      void CheckForPaddleCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const;
 
       void HandleImpact(const Collision& impact);
 };

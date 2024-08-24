@@ -78,7 +78,7 @@ void Game::UpdateGameState(double frameTime)
 
    while (remainingTime > .0)
    {
-      POINTFLOAT newBallPosition = {
+      glm::vec2 newBallPosition = {
          PlayerBall.Position.x + static_cast<FLOAT>(PlayerBall.Velocity.x * remainingTime),
          PlayerBall.Position.y + static_cast<FLOAT>(PlayerBall.Velocity.y * remainingTime)
       };
@@ -117,7 +117,7 @@ void Game::DrawGameEntities(HDC surfaceContext)
 }
 
 
-void Game::CheckForWallCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const
+void Game::CheckForWallCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const
 {
    if (PlayerBall.Velocity.x < .0)
    {
@@ -155,13 +155,13 @@ void Game::CheckForWallCollisions(std::vector<Collision>& collisions, const POIN
 }
 
 
-void Game::CheckForBrickCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const
+void Game::CheckForBrickCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const
 {
    // Do nothing for now
 }
 
 
-void Game::CheckForPaddleCollisions(std::vector<Collision>& collisions, const POINTFLOAT& newBallPosition) const
+void Game::CheckForPaddleCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const
 {
    // Do nothing for now
 }

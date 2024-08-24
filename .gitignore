@@ -17,6 +17,8 @@
 [Rr]elease/
 [Xx]64/
 
+vcpkg_installed/
+
 *.obj
 *.dll
 *.lib

@@ -1,0 +1,7 @@
+{
+  "name": "sgn-game-development",
+  "version": "1.0.0",
+  "dependencies": [
+    "glm"
+  ]
+}

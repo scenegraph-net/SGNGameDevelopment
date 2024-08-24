@@ -2,6 +2,8 @@
 
 #include <windows.h>
 
+#include <glm/glm.hpp>
+
 
 struct Brick
 {
@@ -28,6 +30,6 @@ struct Ball
 {
    static constexpr float RADIUS = 8.f;
 
-   POINTFLOAT Position;
-   POINTFLOAT Velocity;
+   glm::vec2 Position;
+   glm::vec2 Velocity;
 };

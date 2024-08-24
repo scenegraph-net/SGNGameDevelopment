@@ -30,7 +30,7 @@ void DrawManager::DrawPaddle(HDC deviceContext, const Paddle& paddle)
 }
 
 
-void DrawManager::DrawBall(HDC deviceContext, const POINTFLOAT& ballPosition)
+void DrawManager::DrawBall(HDC deviceContext, const glm::vec2& ballPosition)
 {
    Ellipse(deviceContext, 
       static_cast<LONG>(ballPosition.x - Ball::RADIUS),
