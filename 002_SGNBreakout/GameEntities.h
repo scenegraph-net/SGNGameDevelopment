@@ -4,13 +4,15 @@
 
 #include <glm/glm.hpp>
 
+#include "Box2D.h"
+
 
 struct Brick
 {
-   RECT Extent;
+   Box2D Extent;
    COLORREF Color;
    
-   Brick(const RECT& extent, COLORREF color)
+   Brick(const Box2D& extent, COLORREF color)
       : Extent(extent), Color(color)
    { }
 };
@@ -18,11 +20,11 @@ struct Brick
 
 struct Paddle
 {
-   static constexpr int WIDTH = 96;
-   static constexpr int HEIGHT = 24;
+   static constexpr float WIDTH = 96.f;
+   static constexpr float HEIGHT = 24.f;
 
-   LONG PositionX;
-   RECT Extent;
+   Box2D Extent;
+   float PositionX;
 };
 
 

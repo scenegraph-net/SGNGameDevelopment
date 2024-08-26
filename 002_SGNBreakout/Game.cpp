@@ -27,18 +27,24 @@ Game::Game(HWND windowHandle)
    PlayerBall.Velocity = { 150.f, 150.f };
 
    PlayerPaddle.PositionX = 0;
-
-   PlayerPaddle.Extent = {
-      0, WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT - Paddle::HEIGHT,
-      0, WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT
-   };
+   PlayerPaddle.Extent.GetUpperLeft().y = static_cast<float>(WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT) - Paddle::HEIGHT;
+   PlayerPaddle.Extent.GetLowerRight().y = static_cast<float>(WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT);
 
    std::vector<COLORREF> colors = { RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255),
       RGB(0, 255, 255), RGB(127, 127, 127), RGB(255, 0, 255), RGB(255, 255, 0) };
 
    for (int y = 0; y < 8; y++)
+   {
       for (int x = 0; x < 15; x++)
-         Bricks.emplace_back(RECT{ x * 48 + 24, y * 24 + 24, x * 48 + 72, y * 24 + 48 }, colors[(y * 15 + x) % colors.size()]);
+      {
+         const Box2D brickExtent(
+            glm::vec2(static_cast<float>(x * 48 + 24), static_cast<float>(y * 24 + 24)),
+            glm::vec2(static_cast<float>(x * 48 + 72), static_cast<float>(y * 24 + 48))
+         );
+
+         Bricks.emplace_back(brickExtent, colors[(y * 15 + x) % colors.size()]);
+      }
+   }
 }
 
 
@@ -68,10 +74,13 @@ void Game::Update(double frameTime)
 
 void Game::UpdateGameState(double frameTime)
 {
-   const int paddlePosition = std::min(std::max(0, static_cast<int>(MousePosition.x)), PLAYING_FIELD_WIDTH - Paddle::WIDTH);
+   const float paddlePosition = std::min(
+      std::max(.0f, static_cast<float>(MousePosition.x)), 
+      static_cast<float>(PLAYING_FIELD_WIDTH) - Paddle::WIDTH
+   );
 
-   PlayerPaddle.Extent.left = WINDOW_LEFT_MARGIN + paddlePosition;
-   PlayerPaddle.Extent.right = WINDOW_LEFT_MARGIN + paddlePosition + Paddle::WIDTH;
+   PlayerPaddle.Extent.GetUpperLeft().x = WINDOW_LEFT_MARGIN + paddlePosition;
+   PlayerPaddle.Extent.GetLowerRight().x = WINDOW_LEFT_MARGIN + paddlePosition + Paddle::WIDTH;
 
    double remainingTime = frameTime;
    std::vector<Collision> collisions;
@@ -155,15 +164,38 @@ void Game::CheckForWallCollisions(std::vector<Collision>& collisions, const glm:
 }
 
 
-void Game::CheckForBrickCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const
+void Game::CheckForBrickCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition)
 {
-   // Do nothing for now
+   const Box2D ballRectangle = Box2D(PlayerBall.Position, Ball::RADIUS) + Box2D(newBallPosition, Ball::RADIUS);
+
+   for (auto& brick : Bricks)
+   {
+      if (!ballRectangle.Intersects(brick.Extent))
+         continue;
+
+      CollisionSide collisionSide;
+      double collisionTime = .0f;
+
+      if (DetectBallVsRectangleCollision(PlayerBall.Position, newBallPosition, brick.Extent, 
+         collisionSide, collisionTime))
+         collisions.push_back(Collision(CollisionType::Brick, collisionSide, collisionTime, &brick));
+   }
 }
 
 
 void Game::CheckForPaddleCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const
 {
-   // Do nothing for now
+   const Box2D ballRectangle = Box2D(PlayerBall.Position, Ball::RADIUS) + Box2D(newBallPosition, Ball::RADIUS);
+
+   if (!ballRectangle.Intersects(PlayerPaddle.Extent))
+      return;
+
+   CollisionSide collisionSide;
+   double collisionTime = .0f;
+
+   if (DetectBallVsRectangleCollision(PlayerBall.Position, newBallPosition, PlayerPaddle.Extent,
+      collisionSide, collisionTime))
+      collisions.push_back(Collision(CollisionType::Paddle, collisionSide, collisionTime));
 }
 
 
@@ -189,4 +221,13 @@ void Game::HandleImpact(const Collision& impact)
          // Do nothing for now
          break;
    }
+}
+
+
+bool Game::DetectBallVsRectangleCollision(const glm::vec2& ballPosition0, const glm::vec2& ballPosition1,
+   const Box2D& rectangleExtent, CollisionSide& out_collisionSide, double& our_collisionTime)
+{
+   // TODO: Implement
+
+   return false;
 }

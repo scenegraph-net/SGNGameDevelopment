@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Box2D.cpp" />
     <ClCompile Include="DrawingSurface.cpp" />
     <ClCompile Include="DrawManager.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -142,6 +143,7 @@
     <ClCompile Include="WindowClass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Box2D.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="GameEntities.h" />
     <ClInclude Include="DrawingSurface.h" />

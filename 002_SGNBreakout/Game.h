@@ -31,8 +31,11 @@ class Game
       void DrawGameEntities(HDC surfaceContext);
 
       void CheckForWallCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const;
-      void CheckForBrickCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const;
+      void CheckForBrickCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition);
       void CheckForPaddleCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const;
 
       void HandleImpact(const Collision& impact);
+
+      static bool DetectBallVsRectangleCollision(const glm::vec2& ballPosition0, const glm::vec2& ballPosition1,
+         const Box2D& rectangleExtent, CollisionSide& out_collisionSide, double& our_collisionTime);
 };
