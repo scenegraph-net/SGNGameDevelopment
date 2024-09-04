@@ -36,6 +36,16 @@ class Game
 
       void HandleImpact(const Collision& impact);
 
-      static bool DetectBallVsRectangleCollision(const glm::vec2& ballPosition0, const glm::vec2& ballPosition1,
-         const Box2D& rectangleExtent, CollisionSide& out_collisionSide, double& our_collisionTime);
+      void HandleRectangleCollision(const Box2D& extent, CollisionSide side);
+      void HandleWallCollision(CollisionSide side);
+
+      void PointBounce(const glm::vec2& point);
+
+      void BrickImpact(Brick& brick);
+
+      static bool DetectBallVsRectangleCollision(const glm::vec2& ballStartPosition, const glm::vec2& ballEndPosition,
+         const Box2D& rectangleExtent, CollisionSide& out_collisionSide, double& out_collisionTime);
+
+      static bool DetectBallVsPointCollision(const glm::vec2& ballStartPosition, const glm::vec2& ballEndPosition,
+         const glm::vec2& testPoint, double& out_collisionTime);
 };

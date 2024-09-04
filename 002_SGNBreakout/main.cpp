@@ -3,9 +3,17 @@
 
 #include <string>
 
-#include "HiResTimer.h"
 #include "WindowClass.h"
 #include "Game.h"
+
+
+//#define FIXED_FRAME_TIME
+
+#ifdef FIXED_FRAME_TIME
+   static constexpr double FRAME_TIME = .00125;
+#else
+   #include "HiResTimer.h"
+#endif
 
 
 LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
@@ -62,8 +70,10 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
    ShowWindow(mainWindowHandle, showMode);
    UpdateWindow(mainWindowHandle);
 
+#ifndef FIXED_FRAME_TIME
    HiResTimer timer;
    double previousTime = timer.GetElapsed();
+#endif
 
    MSG message;
    int returnValue = INT_MIN;
@@ -80,9 +90,15 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
       }
       else
       {
+#ifdef FIXED_FRAME_TIME
+         double frameTime = FRAME_TIME;
+#else
          double elapsedTime = timer.GetElapsed();
-         game.Update(elapsedTime - previousTime);
+         double frameTime = elapsedTime - previousTime;
          previousTime = elapsedTime;
+#endif
+
+         game.Update(frameTime);
       }
    }
 

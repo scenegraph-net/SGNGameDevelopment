@@ -150,6 +150,7 @@
     <ClInclude Include="DrawManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="HiResTimer.h" />
+    <ClInclude Include="MathUtils.h" />
     <ClInclude Include="WindowClass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
