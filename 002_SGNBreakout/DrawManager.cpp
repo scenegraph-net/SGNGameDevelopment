@@ -45,6 +45,14 @@ void DrawManager::DrawBall(HDC deviceContext, const glm::vec2& ballPosition)
 }
 
 
+void DrawManager::DrawString(HDC deviceContext, const glm::vec2& position, const std::string& text)
+{
+   RECT rectangle{ static_cast<int>(position.x), static_cast<int>(position.y), 0, 0 };
+   DrawText(deviceContext, text.c_str(), static_cast<int>(text.size()), &rectangle, DT_CALCRECT);
+   DrawText(deviceContext, text.c_str(), static_cast<int>(text.size()), &rectangle, 0);
+}
+
+
 void DrawManager::ConvertFromBox2D(const Box2D& source, RECT& out_target)
 {
    out_target.left = static_cast<LONG>(source.GetUpperLeft().x);

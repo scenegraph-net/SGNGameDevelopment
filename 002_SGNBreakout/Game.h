@@ -27,8 +27,11 @@ class Game
       Paddle PlayerPaddle;
       Ball PlayerBall;
 
+      int PlayerScore;
+
       void UpdateGameState(double frameTime);
       void DrawGameEntities(HDC surfaceContext);
+      void DrawPlayerScore(HDC surfaceContext);
 
       void CheckForWallCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const;
       void CheckForBrickCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition);

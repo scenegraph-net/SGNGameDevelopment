@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <windows.h>
 
 #include <glm/glm.hpp>
@@ -17,6 +19,7 @@ class DrawManager
       static void DrawBrick(HDC deviceContext, const Brick& brick);
       static void DrawPaddle(HDC deviceContext, const Paddle& paddle);
       static void DrawBall(HDC deviceContext, const glm::vec2& ballPosition);
+      static void DrawString(HDC deviceContext, const glm::vec2& position, const std::string& text);
 
    private:
       static void ConvertFromBox2D(const Box2D& source, RECT& out_target);

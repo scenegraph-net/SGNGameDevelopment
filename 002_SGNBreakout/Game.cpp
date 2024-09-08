@@ -23,7 +23,7 @@ static constexpr RECT BALL_AREA =
 
 
 Game::Game(HWND windowHandle)
-   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ })
+   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), PlayerScore(0)
 {
    PlayerBall.Position = { 200.f, 400.f };
    PlayerBall.Velocity = { 150.f, 150.f };
@@ -67,6 +67,7 @@ void Game::Update(double frameTime)
    HDC surfaceContext = Surface.GetDeviceContext();
    DrawManager::DrawBackground(surfaceContext, clientRectangle);
    DrawGameEntities(surfaceContext);
+   DrawPlayerScore(surfaceContext);
 
    HDC deviceContext = GetDC(WindowHandle);
    Surface.Present(deviceContext);
@@ -123,9 +124,16 @@ void Game::DrawGameEntities(HDC surfaceContext)
    DrawManager::DrawPaddle(surfaceContext, PlayerPaddle);
 
    for (const auto& brick : Bricks)
-      DrawManager::DrawBrick(surfaceContext, brick);
+      if (brick.Active)
+         DrawManager::DrawBrick(surfaceContext, brick);
 
    DrawManager::DrawBall(surfaceContext, PlayerBall.Position);
+}
+
+
+void Game::DrawPlayerScore(HDC surfaceContext)
+{
+   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 50.f), std::format("Score:\n{}", PlayerScore));
 }
 
 
@@ -173,7 +181,7 @@ void Game::CheckForBrickCollisions(std::vector<Collision>& collisions, const glm
 
    for (auto& brick : Bricks)
    {
-      if (!ballRectangle.Intersects(brick.Extent))
+      if (!brick.Active || !ballRectangle.Intersects(brick.Extent))
          continue;
 
       CollisionSide collisionSide;
@@ -290,7 +298,8 @@ void Game::HandleWallCollision(CollisionSide side)
 
 void Game::BrickImpact(Brick& brick)
 {
-   // TODO: Implement
+   brick.Active = false;
+   PlayerScore++;
 }
 
 

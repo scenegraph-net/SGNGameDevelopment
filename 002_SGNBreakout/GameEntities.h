@@ -11,9 +11,10 @@ struct Brick
 {
    Box2D Extent;
    COLORREF Color;
+   bool Active;
    
    Brick(const Box2D& extent, COLORREF color)
-      : Extent(extent), Color(color)
+      : Extent(extent), Color(color), Active(true)
    { }
 };
 
