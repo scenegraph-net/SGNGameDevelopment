@@ -28,10 +28,15 @@ class Game
       Ball PlayerBall;
 
       int PlayerScore;
+      int PlayerLives;
+      bool GameRunning;
+
+      void ResetBall();
 
       void UpdateGameState(double frameTime);
       void DrawGameEntities(HDC surfaceContext);
       void DrawPlayerScore(HDC surfaceContext);
+      void DrawGameOver(HDC surfaceContext);
 
       void CheckForWallCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const;
       void CheckForBrickCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition);

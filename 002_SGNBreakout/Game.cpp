@@ -23,10 +23,9 @@ static constexpr RECT BALL_AREA =
 
 
 Game::Game(HWND windowHandle)
-   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), PlayerScore(0)
+   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), PlayerScore(0), PlayerLives(3), GameRunning(true)
 {
-   PlayerBall.Position = { 200.f, 400.f };
-   PlayerBall.Velocity = { 150.f, 150.f };
+   ResetBall();
 
    PlayerPaddle.PositionX = 0;
    PlayerPaddle.Extent.GetUpperLeft().y = static_cast<float>(WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT) - Paddle::HEIGHT;
@@ -50,6 +49,13 @@ Game::Game(HWND windowHandle)
 }
 
 
+void Game::ResetBall()
+{
+   PlayerBall.Position = { 200.f, 400.f };
+   PlayerBall.Velocity = { 150.f, 150.f };
+}
+
+
 void Game::SetMousePosition(int x, int y)
 {
    MousePosition.x = x;
@@ -62,12 +68,17 @@ void Game::Update(double frameTime)
    RECT clientRectangle;
    GetClientRect(WindowHandle, &clientRectangle);
 
-   UpdateGameState(frameTime);
-
    HDC surfaceContext = Surface.GetDeviceContext();
    DrawManager::DrawBackground(surfaceContext, clientRectangle);
-   DrawGameEntities(surfaceContext);
-   DrawPlayerScore(surfaceContext);
+
+   if (GameRunning)
+   {
+      UpdateGameState(frameTime);
+      DrawGameEntities(surfaceContext);
+      DrawPlayerScore(surfaceContext);
+   }
+   else
+      DrawGameOver(surfaceContext);
 
    HDC deviceContext = GetDC(WindowHandle);
    Surface.Present(deviceContext);
@@ -134,6 +145,13 @@ void Game::DrawGameEntities(HDC surfaceContext)
 void Game::DrawPlayerScore(HDC surfaceContext)
 {
    DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 50.f), std::format("Score:\n{}", PlayerScore));
+   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 150.f), std::format("Lives:\n{}", PlayerLives));
+}
+
+
+void Game::DrawGameOver(HDC surfaceContext)
+{
+   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 50.f), std::format("GAME OVER!\nFinal score: {}", PlayerScore));
 }
 
 
@@ -289,8 +307,11 @@ void Game::HandleWallCollision(CollisionSide side)
          PlayerBall.Velocity.y *= -1.f;
          break;
       case CollisionSide::Bottom:
-         PlayerBall.Position.y = BALL_AREA.bottom;
-         PlayerBall.Velocity.y *= -1.f;
+         if (--PlayerLives == 0)
+            GameRunning = false;
+         else
+            ResetBall();
+
          break;
    }
 }
