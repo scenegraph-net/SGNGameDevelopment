@@ -13,6 +13,8 @@ static constexpr int WINDOW_TOP_MARGIN = 24;
 static constexpr int PLAYING_FIELD_WIDTH = 720;
 static constexpr int PLAYING_FIELD_HEIGHT = 528;
 
+static constexpr int INITIAL_PLAYER_LIVES = 3;
+
 static constexpr RECT BALL_AREA =
 {
    static_cast<LONG>(WINDOW_LEFT_MARGIN + Ball::RADIUS),
@@ -23,13 +25,30 @@ static constexpr RECT BALL_AREA =
 
 
 Game::Game(HWND windowHandle)
-   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), PlayerScore(0), PlayerLives(3), GameRunning(true)
+   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), CurrentAppState(AppState::INIT)
 {
    ResetBall();
+   ResetBricks();
+   ResetScore();
 
    PlayerPaddle.PositionX = 0;
    PlayerPaddle.Extent.GetUpperLeft().y = static_cast<float>(WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT) - Paddle::HEIGHT;
    PlayerPaddle.Extent.GetLowerRight().y = static_cast<float>(WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT);
+
+   ChangeAppState(AppState::READY);
+}
+
+
+void Game::ResetBall()
+{
+   PlayerBall.Position = { 200.f, 400.f };
+   PlayerBall.Velocity = { 150.f, 150.f };
+}
+
+
+void Game::ResetBricks()
+{
+   Bricks.clear();
 
    std::vector<COLORREF> colors = { RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255),
       RGB(0, 255, 255), RGB(127, 127, 127), RGB(255, 0, 255), RGB(255, 255, 0) };
@@ -46,13 +65,15 @@ Game::Game(HWND windowHandle)
          Bricks.emplace_back(brickExtent, colors[(y * 15 + x) % colors.size()]);
       }
    }
+
+   RemainingBricks = Bricks.size();
 }
 
 
-void Game::ResetBall()
+void Game::ResetScore()
 {
-   PlayerBall.Position = { 200.f, 400.f };
-   PlayerBall.Velocity = { 150.f, 150.f };
+   PlayerScore = 0;
+   PlayerLives = INITIAL_PLAYER_LIVES;
 }
 
 
@@ -60,6 +81,26 @@ void Game::SetMousePosition(int x, int y)
 {
    MousePosition.x = x;
    MousePosition.y = y;
+}
+
+
+void Game::MouseClick()
+{
+   switch (CurrentAppState)
+   {
+      case AppState::READY:
+         ChangeAppState(AppState::PLAYING);
+         break;
+      case AppState::LOST:
+         ResetBricks();
+         ResetScore();
+         ChangeAppState(AppState::READY);
+         break;
+      case AppState::LEVEL_COMPLETED:
+         ResetBricks();
+         ChangeAppState(AppState::READY);
+         break;
+   }
 }
 
 
@@ -71,14 +112,27 @@ void Game::Update(double frameTime)
    HDC surfaceContext = Surface.GetDeviceContext();
    DrawManager::DrawBackground(surfaceContext, clientRectangle);
 
-   if (GameRunning)
+   switch (CurrentAppState)
    {
-      UpdateGameState(frameTime);
-      DrawGameEntities(surfaceContext);
-      DrawPlayerScore(surfaceContext);
+      case AppState::PLAYING:
+         UpdateGameState(frameTime);
+         DrawGameEntities(surfaceContext);
+         DrawPlayerScore(surfaceContext);
+         break;
+      case AppState::READY:
+         UpdateGameState(frameTime);
+         DrawGameEntities(surfaceContext);
+         DrawPlayerScore(surfaceContext);
+         DrawReadyMessage(surfaceContext);
+         break;
+      case AppState::LEVEL_COMPLETED:
+         DrawLevelCompletedMessage(surfaceContext);
+         break;
+      case AppState::LOST:
+         DrawGameEntities(surfaceContext);
+         DrawGameOverMessage(surfaceContext);
+         break;
    }
-   else
-      DrawGameOver(surfaceContext);
 
    HDC deviceContext = GetDC(WindowHandle);
    Surface.Present(deviceContext);
@@ -99,7 +153,7 @@ void Game::UpdateGameState(double frameTime)
    double remainingTime = frameTime;
    std::vector<Collision> collisions;
 
-   while (remainingTime > .0)
+   while (remainingTime > .0 && AppState::PLAYING == CurrentAppState)
    {
       glm::vec2 newBallPosition = {
          PlayerBall.Position.x + static_cast<FLOAT>(PlayerBall.Velocity.x * remainingTime),
@@ -149,9 +203,23 @@ void Game::DrawPlayerScore(HDC surfaceContext)
 }
 
 
-void Game::DrawGameOver(HDC surfaceContext)
+void Game::DrawReadyMessage(HDC surfaceContext)
 {
-   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 50.f), std::format("GAME OVER!\nFinal score: {}", PlayerScore));
+   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 250.f), "Click left mouse button to start!");
+}
+
+
+void Game::DrawLevelCompletedMessage(HDC surfaceContext)
+{
+   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 250.f), 
+      "Level completed!\nClick left mouse button\n to start next level!");
+}
+
+
+void Game::DrawGameOverMessage(HDC surfaceContext)
+{
+   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 50.f), 
+      std::format("GAME OVER!\nFinal score: {}\n\nClick left mouse button\nto start a new game!", PlayerScore));
 }
 
 
@@ -307,11 +375,7 @@ void Game::HandleWallCollision(CollisionSide side)
          PlayerBall.Velocity.y *= -1.f;
          break;
       case CollisionSide::Bottom:
-         if (--PlayerLives == 0)
-            GameRunning = false;
-         else
-            ResetBall();
-
+         ChangeAppState((--PlayerLives == 0) ? AppState::LOST : AppState::READY);
          break;
    }
 }
@@ -321,6 +385,27 @@ void Game::BrickImpact(Brick& brick)
 {
    brick.Active = false;
    PlayerScore++;
+   RemainingBricks--;
+
+   if (0 == RemainingBricks)
+      ChangeAppState(AppState::LEVEL_COMPLETED);
+}
+
+
+void Game::ChangeAppState(AppState newAppState)
+{
+   if (newAppState == CurrentAppState || AppState::INIT == newAppState) // Transitioning back to INIT is not allowed
+      return;
+
+   CurrentAppState = newAppState;
+
+   if (AppState::READY == CurrentAppState)
+      ResetBall();
+
+   if (AppState::PLAYING == CurrentAppState)
+      while (ShowCursor(FALSE) >= 0);
+   else
+      ShowCursor(TRUE);
 }
 
 

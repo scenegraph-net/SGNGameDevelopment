@@ -25,6 +25,9 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPAR
       case WM_MOUSEMOVE:
          game.SetMousePosition(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
          return 0;
+      case WM_LBUTTONUP:
+         game.MouseClick();
+         return 0;
       case WM_DESTROY:
          PostQuitMessage(0);
          return 0;

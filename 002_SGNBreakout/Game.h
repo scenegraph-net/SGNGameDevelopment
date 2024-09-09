@@ -9,12 +9,23 @@
 #include "Collision.h"
 
 
+enum class AppState
+{
+   INIT,
+   READY,
+   PLAYING,
+   LEVEL_COMPLETED,
+   LOST,
+};
+
+
 class Game
 {
    public:
       Game(HWND windowHandle);
 
       void SetMousePosition(int x, int y);
+      void MouseClick();
 
       void Update(double frameTime);
 
@@ -27,16 +38,23 @@ class Game
       Paddle PlayerPaddle;
       Ball PlayerBall;
 
+      AppState CurrentAppState;
+
       int PlayerScore;
       int PlayerLives;
-      bool GameRunning;
+      
+      size_t RemainingBricks;
 
       void ResetBall();
+      void ResetBricks();
+      void ResetScore();
 
       void UpdateGameState(double frameTime);
       void DrawGameEntities(HDC surfaceContext);
       void DrawPlayerScore(HDC surfaceContext);
-      void DrawGameOver(HDC surfaceContext);
+      void DrawReadyMessage(HDC surfaceContext);
+      void DrawGameOverMessage(HDC surfaceContext);
+      void DrawLevelCompletedMessage(HDC surfaceContext);
 
       void CheckForWallCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const;
       void CheckForBrickCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition);
@@ -50,6 +68,8 @@ class Game
       void PointBounce(const glm::vec2& point);
 
       void BrickImpact(Brick& brick);
+
+      void ChangeAppState(AppState newAppState);
 
       static bool DetectBallVsRectangleCollision(const glm::vec2& ballStartPosition, const glm::vec2& ballEndPosition,
          const Box2D& rectangleExtent, CollisionSide& out_collisionSide, double& out_collisionTime);
