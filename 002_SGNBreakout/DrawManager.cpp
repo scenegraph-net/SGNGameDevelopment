@@ -18,7 +18,7 @@ void DrawManager::DrawBrick(HDC deviceContext, const Brick& brick)
 {
    RECT brickExtent;
    ConvertFromBox2D(brick.Extent, brickExtent);
-   HBRUSH brush = CreateSolidBrush(brick.Color);
+   HBRUSH brush = CreateSolidBrush(brick.Type.Color);
    FillRect(deviceContext, &brickExtent, brush);
    DeleteObject(brush);
 }

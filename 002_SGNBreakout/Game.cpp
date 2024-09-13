@@ -15,6 +15,9 @@ static constexpr int PLAYING_FIELD_HEIGHT = 528;
 
 static constexpr int INITIAL_PLAYER_LIVES = 3;
 
+static constexpr int BRICK_WIDTH = 48;
+static constexpr int BRICK_HEIGHT = 24;
+
 static constexpr RECT BALL_AREA =
 {
    static_cast<LONG>(WINDOW_LEFT_MARGIN + Ball::RADIUS),
@@ -24,18 +27,38 @@ static constexpr RECT BALL_AREA =
 };
 
 
-Game::Game(HWND windowHandle)
-   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), CurrentAppState(AppState::INIT)
+struct BrickEntry
 {
+   glm::ivec2 Position;
+   unsigned short TypeIndex;
+};
+
+
+Game::Game(HWND windowHandle)
+   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), CurrentAppState(AppState::INIT), CurrentLevelIndex(0)
+{
+   SetupBrickTypes();
+
    ResetBall();
-   ResetBricks();
    ResetScore();
+
+   LoadLevel();
 
    PlayerPaddle.PositionX = 0;
    PlayerPaddle.Extent.GetUpperLeft().y = static_cast<float>(WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT) - Paddle::HEIGHT;
    PlayerPaddle.Extent.GetLowerRight().y = static_cast<float>(WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT);
 
    ChangeAppState(AppState::READY);
+}
+
+
+void Game::SetupBrickTypes()
+{
+   std::vector<COLORREF> colors = { RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255),
+      RGB(0, 255, 255), RGB(127, 127, 127), RGB(255, 0, 255), RGB(255, 255, 0) };
+
+   for (const auto& color : colors)
+      BrickTypes.emplace_back(color);
 }
 
 
@@ -46,27 +69,43 @@ void Game::ResetBall()
 }
 
 
-void Game::ResetBricks()
+void Game::LoadLevel()
 {
-   Bricks.clear();
+   std::vector<BrickEntry> brickEntries;
 
-   std::vector<COLORREF> colors = { RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255),
-      RGB(0, 255, 255), RGB(127, 127, 127), RGB(255, 0, 255), RGB(255, 255, 0) };
-
-   for (int y = 0; y < 8; y++)
+   if (CurrentLevelIndex % 2 == 0)
    {
-      for (int x = 0; x < 15; x++)
-      {
-         const Box2D brickExtent(
-            glm::vec2(static_cast<float>(x * 48 + 24), static_cast<float>(y * 24 + 24)),
-            glm::vec2(static_cast<float>(x * 48 + 72), static_cast<float>(y * 24 + 48))
-         );
-
-         Bricks.emplace_back(brickExtent, colors[(y * 15 + x) % colors.size()]);
-      }
+      brickEntries.push_back(BrickEntry{ { 4, 0 }, 0 });
+      brickEntries.push_back(BrickEntry{ { 10, 0}, 1 });
+      brickEntries.push_back(BrickEntry{ { 12, 0}, 2 });
+      brickEntries.push_back(BrickEntry{ { 3, 1}, 3 });
+      brickEntries.push_back(BrickEntry{ { 8, 1}, 4 });
+      brickEntries.push_back(BrickEntry{ { 5, 2}, 5 });
+      brickEntries.push_back(BrickEntry{ { 13, 3}, 6 });
+   }
+   else
+   {
+      for (int y = 0, c = 0; y < 8; y++)
+         for (int x = 0; x < 15; x++, c++)
+            brickEntries.push_back(BrickEntry{ { x, y }, static_cast<unsigned short>(c % BrickTypes.size()) });
    }
 
-   RemainingBricks = Bricks.size();
+   CurrentLevel = std::make_unique<Level>();
+
+   for (const auto& brickEntry : brickEntries)
+   {
+      const float xmin = static_cast<float>(brickEntry.Position.x * BRICK_WIDTH + WINDOW_LEFT_MARGIN);
+      const float xmax = static_cast<float>(brickEntry.Position.x * BRICK_WIDTH + WINDOW_LEFT_MARGIN + BRICK_WIDTH);
+
+      const float ymin = static_cast<float>(brickEntry.Position.y * BRICK_HEIGHT + WINDOW_TOP_MARGIN);
+      const float ymax = static_cast<float>(brickEntry.Position.y * BRICK_HEIGHT + WINDOW_TOP_MARGIN + BRICK_HEIGHT);
+
+      const Box2D brickExtent(glm::vec2(xmin, ymin), glm::vec2(xmax, ymax));
+      unsigned short typeIndex = std::min(brickEntry.TypeIndex, static_cast<unsigned short>(BrickTypes.size()));
+      CurrentLevel->Bricks.emplace_back(brickExtent, BrickTypes[typeIndex]);
+   }
+
+   CurrentLevel->ActiveBrickCount = CurrentLevel->Bricks.size();
 }
 
 
@@ -92,12 +131,13 @@ void Game::MouseClick()
          ChangeAppState(AppState::PLAYING);
          break;
       case AppState::LOST:
-         ResetBricks();
          ResetScore();
+         LoadLevel();
          ChangeAppState(AppState::READY);
          break;
       case AppState::LEVEL_COMPLETED:
-         ResetBricks();
+         CurrentLevelIndex++;
+         LoadLevel();
          ChangeAppState(AppState::READY);
          break;
    }
@@ -188,7 +228,7 @@ void Game::DrawGameEntities(HDC surfaceContext)
 {
    DrawManager::DrawPaddle(surfaceContext, PlayerPaddle);
 
-   for (const auto& brick : Bricks)
+   for (const auto& brick : CurrentLevel->Bricks)
       if (brick.Active)
          DrawManager::DrawBrick(surfaceContext, brick);
 
@@ -265,7 +305,7 @@ void Game::CheckForBrickCollisions(std::vector<Collision>& collisions, const glm
 {
    const Box2D ballRectangle = Box2D(PlayerBall.Position, Ball::RADIUS) + Box2D(newBallPosition, Ball::RADIUS);
 
-   for (auto& brick : Bricks)
+   for (auto& brick : CurrentLevel->Bricks)
    {
       if (!brick.Active || !ballRectangle.Intersects(brick.Extent))
          continue;
@@ -385,9 +425,9 @@ void Game::BrickImpact(Brick& brick)
 {
    brick.Active = false;
    PlayerScore++;
-   RemainingBricks--;
+   CurrentLevel->ActiveBrickCount--;
 
-   if (0 == RemainingBricks)
+   if (0 == CurrentLevel->ActiveBrickCount)
       ChangeAppState(AppState::LEVEL_COMPLETED);
 }
 

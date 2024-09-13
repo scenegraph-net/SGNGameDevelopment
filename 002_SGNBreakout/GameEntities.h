@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <windows.h>
 
 #include <glm/glm.hpp>
@@ -7,14 +9,24 @@
 #include "Box2D.h"
 
 
+struct BrickType
+{
+   COLORREF Color;
+
+   BrickType(COLORREF color)
+      : Color(color)
+   { }
+};
+
+
 struct Brick
 {
+   const BrickType& Type;
    Box2D Extent;
-   COLORREF Color;
    bool Active;
    
-   Brick(const Box2D& extent, COLORREF color)
-      : Extent(extent), Color(color), Active(true)
+   Brick(const Box2D& extent, const BrickType& type)
+      : Extent(extent), Type(type), Active(true)
    { }
 };
 
@@ -35,4 +47,11 @@ struct Ball
 
    glm::vec2 Position;
    glm::vec2 Velocity;
+};
+
+
+struct Level
+{
+   std::vector<Brick> Bricks;
+   size_t ActiveBrickCount;
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include <windows.h>
@@ -34,19 +35,22 @@ class Game
       POINT MousePosition;
       DrawingSurface Surface;
 
-      std::vector<Brick> Bricks;
       Paddle PlayerPaddle;
       Ball PlayerBall;
 
       AppState CurrentAppState;
+      std::unique_ptr<Level> CurrentLevel;
+      int CurrentLevelIndex;
 
       int PlayerScore;
       int PlayerLives;
-      
-      size_t RemainingBricks;
+
+      std::vector<BrickType> BrickTypes;
+
+      void SetupBrickTypes();
+      void LoadLevel();
 
       void ResetBall();
-      void ResetBricks();
       void ResetScore();
 
       void UpdateGameState(double frameTime);
