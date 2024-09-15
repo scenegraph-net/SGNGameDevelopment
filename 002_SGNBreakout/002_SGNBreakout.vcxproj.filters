@@ -42,6 +42,9 @@
     <ClCompile Include="ResourceDataLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BitmapImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowClass.h">
@@ -80,6 +83,9 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BitmapImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Levels\0001.level">
@@ -93,5 +99,34 @@
     <ResourceCompile Include="002_SGNBreakout.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\Graphics\background.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Graphics\brick000.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Graphics\brick001.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Graphics\brick002.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Graphics\brick003.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Graphics\brick004.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Graphics\brick005.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Graphics\brick006.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Graphics\paddle.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

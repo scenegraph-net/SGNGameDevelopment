@@ -8,6 +8,8 @@
 #include "DrawingSurface.h"
 #include "GameEntities.h"
 #include "Collision.h"
+#include "BitmapImage.h"
+#include "DrawManager.h"
 
 
 enum class AppState
@@ -37,6 +39,8 @@ class Game
       HWND WindowHandle;
       POINT MousePosition;
       DrawingSurface Surface;
+
+      DrawManager MainWindowDrawManager;
 
       Paddle PlayerPaddle;
       Ball PlayerBall;

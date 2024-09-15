@@ -41,7 +41,8 @@ struct BrickEntry
 
 
 Game::Game(HWND windowHandle)
-   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), CurrentAppState(AppState::INIT), CurrentLevelIndex(0)
+   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), CurrentAppState(AppState::INIT), CurrentLevelIndex(0),
+   MainWindowDrawManager(IDB_BITMAP_BACKGROUND, IDB_BITMAP_PADDLE)
 {
    SetupBrickTypes();
 
@@ -60,11 +61,18 @@ Game::Game(HWND windowHandle)
 
 void Game::SetupBrickTypes()
 {
-   std::vector<COLORREF> colors = { RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255),
-      RGB(0, 255, 255), RGB(127, 127, 127), RGB(255, 0, 255), RGB(255, 255, 0) };
+   std::vector<int> brickImageResourceIds = {
+      IDB_BITMAP_BRICK_0,
+      IDB_BITMAP_BRICK_1,
+      IDB_BITMAP_BRICK_2,
+      IDB_BITMAP_BRICK_3,
+      IDB_BITMAP_BRICK_4,
+      IDB_BITMAP_BRICK_5,
+      IDB_BITMAP_BRICK_6,
+   };
 
-   for (const auto& color : colors)
-      BrickTypes.emplace_back(color);
+   for (const int resourceId : brickImageResourceIds)
+      BrickTypes.emplace_back(MainWindowDrawManager.AddBrickType(resourceId));
 }
 
 
@@ -182,7 +190,7 @@ void Game::Update(double frameTime)
    GetClientRect(WindowHandle, &clientRectangle);
 
    HDC surfaceContext = Surface.GetDeviceContext();
-   DrawManager::DrawBackground(surfaceContext, clientRectangle);
+   MainWindowDrawManager.DrawBackground(surfaceContext, clientRectangle);
 
    switch (CurrentAppState)
    {
@@ -258,11 +266,11 @@ void Game::UpdateGameState(double frameTime)
 
 void Game::DrawGameEntities(HDC surfaceContext)
 {
-   DrawManager::DrawPaddle(surfaceContext, PlayerPaddle);
+   MainWindowDrawManager.DrawPaddle(surfaceContext, PlayerPaddle);
 
    for (const auto& brick : CurrentLevel->Bricks)
       if (brick.Active)
-         DrawManager::DrawBrick(surfaceContext, brick);
+         MainWindowDrawManager.DrawBrick(surfaceContext, brick);
 
    DrawManager::DrawBall(surfaceContext, PlayerBall.Position);
 }

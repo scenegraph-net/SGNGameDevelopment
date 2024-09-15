@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BitmapImage.cpp" />
     <ClCompile Include="Box2D.cpp" />
     <ClCompile Include="DrawingSurface.cpp" />
     <ClCompile Include="DrawManager.cpp" />
@@ -144,6 +145,7 @@
     <ClCompile Include="WindowClass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BitmapImage.h" />
     <ClInclude Include="Box2D.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="DataLoader.h" />
@@ -163,6 +165,17 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="002_SGNBreakout.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\Graphics\background.bmp" />
+    <Image Include="Resources\Graphics\brick000.bmp" />
+    <Image Include="Resources\Graphics\brick001.bmp" />
+    <Image Include="Resources\Graphics\brick002.bmp" />
+    <Image Include="Resources\Graphics\brick003.bmp" />
+    <Image Include="Resources\Graphics\brick004.bmp" />
+    <Image Include="Resources\Graphics\brick005.bmp" />
+    <Image Include="Resources\Graphics\brick006.bmp" />
+    <Image Include="Resources\Graphics\paddle.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

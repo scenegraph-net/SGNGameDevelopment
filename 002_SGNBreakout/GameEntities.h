@@ -11,10 +11,10 @@
 
 struct BrickType
 {
-   COLORREF Color;
+   int ImageIndex;
 
-   BrickType(COLORREF color)
-      : Color(color)
+   BrickType(int imageIndex)
+      : ImageIndex(imageIndex)
    { }
 };
 

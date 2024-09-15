@@ -1,16 +1,29 @@
 #include "DrawManager.h"
 
 #include "GameEntities.h"
+#include "BitmapImage.h"
 
 
-void DrawManager::DrawBackground(HDC deviceContext, const RECT& extent)
+DrawManager::DrawManager(int backgroundBitmapResourceId, int paddleBitmapResourceId)
 {
-   FillRect(deviceContext, &extent, static_cast<HBRUSH>(WHITE_BRUSH));
+   HINSTANCE instance = GetModuleHandle(nullptr);
+   BackgroundImage.LoadFromResource(instance, backgroundBitmapResourceId);
+   PaddleImage.LoadFromResource(instance, paddleBitmapResourceId);
+}
 
-   HBRUSH blackBrush = CreateSolidBrush(RGB(0, 0, 0));
-   RECT playingField{ 24, 24, 744, 552 };
-   FillRect(deviceContext, &playingField, blackBrush);
-   DeleteObject(blackBrush);
+
+int DrawManager::AddBrickType(int brickBitmapResourceId)
+{
+   size_t result = BrickImages.size();
+   BrickImages.emplace_back();
+   BrickImages.back().LoadFromResource(GetModuleHandle(nullptr), brickBitmapResourceId);
+   return static_cast<int>(result);
+}
+
+
+void DrawManager::DrawBackground(HDC deviceContext, const RECT& extent) const
+{
+   BackgroundImage.Stretch(deviceContext, extent);
 }
 
 
@@ -18,9 +31,7 @@ void DrawManager::DrawBrick(HDC deviceContext, const Brick& brick)
 {
    RECT brickExtent;
    ConvertFromBox2D(brick.Extent, brickExtent);
-   HBRUSH brush = CreateSolidBrush(brick.Type.Color);
-   FillRect(deviceContext, &brickExtent, brush);
-   DeleteObject(brush);
+   BrickImages[brick.Type.ImageIndex].Stretch(deviceContext, brickExtent);
 }
 
 
@@ -28,9 +39,7 @@ void DrawManager::DrawPaddle(HDC deviceContext, const Paddle& paddle)
 {
    RECT paddleExtent;
    ConvertFromBox2D(paddle.Extent, paddleExtent);
-   HBRUSH yellowBrush = CreateSolidBrush(RGB(255, 255, 0));
-   FillRect(deviceContext, &paddleExtent, yellowBrush);
-   DeleteObject(yellowBrush);
+   PaddleImage.Stretch(deviceContext, paddleExtent);
 }
 
 
