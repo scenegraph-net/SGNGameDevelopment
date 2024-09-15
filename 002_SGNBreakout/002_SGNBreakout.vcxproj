@@ -140,18 +140,29 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HiResTimer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ResourceDataLoader.cpp" />
     <ClCompile Include="WindowClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Box2D.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="DataLoader.h" />
     <ClInclude Include="GameEntities.h" />
     <ClInclude Include="DrawingSurface.h" />
     <ClInclude Include="DrawManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="HiResTimer.h" />
     <ClInclude Include="MathUtils.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="ResourceDataLoader.h" />
     <ClInclude Include="WindowClass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Levels\0001.level" />
+    <None Include="Resources\Levels\0002.level" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="002_SGNBreakout.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

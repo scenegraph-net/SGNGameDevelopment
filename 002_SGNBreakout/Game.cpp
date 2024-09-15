@@ -1,10 +1,16 @@
 #include "Game.h"
 
 #include <algorithm>
+#include <array>
 #include <format>
+#include <sstream>
 
 #include "DrawManager.h"
 #include "MathUtils.h"
+
+#include "ResourceDataLoader.h"
+
+#include "resource.h"
 
 
 static constexpr int WINDOW_LEFT_MARGIN = 24;
@@ -71,25 +77,51 @@ void Game::ResetBall()
 
 void Game::LoadLevel()
 {
+   std::array<int, 2> levelResourceIds{ IDR_LEVEL_0001, IDR_LEVEL_0002 };
+   const int levelIndex = CurrentLevelIndex % levelResourceIds.size();
+
+   std::vector<unsigned char> levelData;
+   std::unique_ptr<DataLoader> dataLoader = std::make_unique<ResourceDataLoader>("LEVEL", levelResourceIds[levelIndex]);
+   dataLoader->Load(levelData);
+
    std::vector<BrickEntry> brickEntries;
+   ParseLevelData(levelData, brickEntries);
 
-   if (CurrentLevelIndex % 2 == 0)
+   CreateLevel(brickEntries);
+}
+
+
+void Game::ParseLevelData(const std::vector<unsigned char>& levelData, std::vector<BrickEntry>& brickEntries)
+{
+   std::string levelText(levelData.begin(), levelData.end());
+
+   std::istringstream dataStream(levelText);
+   std::string line;
+
+   while (std::getline(dataStream, line))
    {
-      brickEntries.push_back(BrickEntry{ { 4, 0 }, 0 });
-      brickEntries.push_back(BrickEntry{ { 10, 0}, 1 });
-      brickEntries.push_back(BrickEntry{ { 12, 0}, 2 });
-      brickEntries.push_back(BrickEntry{ { 3, 1}, 3 });
-      brickEntries.push_back(BrickEntry{ { 8, 1}, 4 });
-      brickEntries.push_back(BrickEntry{ { 5, 2}, 5 });
-      brickEntries.push_back(BrickEntry{ { 13, 3}, 6 });
-   }
-   else
-   {
-      for (int y = 0, c = 0; y < 8; y++)
-         for (int x = 0; x < 15; x++, c++)
-            brickEntries.push_back(BrickEntry{ { x, y }, static_cast<unsigned short>(c % BrickTypes.size()) });
+      if (line.length() < 5 || line[0] == '#')
+         continue;
+
+      unsigned short brickX;
+      unsigned short brickY;
+      unsigned short brickTypeIndex;
+
+      std::istringstream lineStream(line);
+
+      lineStream >> brickX;
+      lineStream >> brickY;
+      lineStream >> brickTypeIndex;
+
+      brickEntries.push_back(BrickEntry{ { brickX, brickY }, brickTypeIndex });
    }
 
+   return;
+}
+
+
+void Game::CreateLevel(const std::vector<BrickEntry>& brickEntries)
+{
    CurrentLevel = std::make_unique<Level>();
 
    for (const auto& brickEntry : brickEntries)

@@ -20,6 +20,9 @@ enum class AppState
 };
 
 
+struct BrickEntry;
+
+
 class Game
 {
    public:
@@ -48,7 +51,10 @@ class Game
       std::vector<BrickType> BrickTypes;
 
       void SetupBrickTypes();
+
       void LoadLevel();
+      void ParseLevelData(const std::vector<unsigned char>& levelData, std::vector<BrickEntry>& brickEntries);
+      void CreateLevel(const std::vector<BrickEntry>& brickEntries);
 
       void ResetBall();
       void ResetScore();
