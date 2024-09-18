@@ -17,6 +17,7 @@ enum class AppState
    Init,
    Ready,
    Playing,
+   Pause,
    LevelCompleted,
    Lost,
 };
@@ -67,6 +68,7 @@ class Game
       void DrawGameEntities(HDC surfaceContext);
       void DrawPlayerStats(HDC surfaceContext);
       void DrawReadyMessage(HDC surfaceContext);
+      void DrawPauseMessage(HDC surfaceContext);
       void DrawGameOverMessage(HDC surfaceContext);
       void DrawLevelCompletedMessage(HDC surfaceContext);
 

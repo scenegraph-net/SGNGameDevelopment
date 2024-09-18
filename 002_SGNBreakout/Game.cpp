@@ -167,6 +167,12 @@ void Game::MouseClick()
 {
    switch (CurrentAppState)
    {
+      case AppState::Playing:
+         ChangeAppState(AppState::Pause);
+         break;
+      case AppState::Pause:
+         ChangeAppState(AppState::Playing);
+         break;
       case AppState::Ready:
          ChangeAppState(AppState::Playing);
          break;
@@ -204,6 +210,12 @@ void Game::Update(double frameTime)
          DrawGameEntities(surfaceContext);
          DrawPlayerStats(surfaceContext);
          DrawReadyMessage(surfaceContext);
+         break;
+      case AppState::Pause:
+         UpdateGameState(frameTime);
+         DrawGameEntities(surfaceContext);
+         DrawPlayerStats(surfaceContext);
+         DrawPauseMessage(surfaceContext);
          break;
       case AppState::LevelCompleted:
          DrawLevelCompletedMessage(surfaceContext);
@@ -290,6 +302,13 @@ void Game::DrawPlayerStats(HDC surfaceContext)
 void Game::DrawReadyMessage(HDC surfaceContext)
 {
    MainWindowDrawManager.DrawString(surfaceContext, TextType::GameMessage, "Click left mouse button to start!");
+}
+
+
+void Game::DrawPauseMessage(HDC surfaceContext)
+{
+   MainWindowDrawManager.DrawString(surfaceContext, TextType::GameMessage,
+      "Game paused!\nClick left mouse button to continue");
 }
 
 
