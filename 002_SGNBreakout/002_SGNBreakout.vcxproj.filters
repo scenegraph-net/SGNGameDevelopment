@@ -13,8 +13,14 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Level Data">
+    <Filter Include="Resource Files\Level Data">
       <UniqueIdentifier>{15e30873-82bf-48bd-ab51-40de059b82e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Sounds">
+      <UniqueIdentifier>{7e9c0a92-8998-4834-9fb4-05d456af0d97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Graphics">
+      <UniqueIdentifier>{0113954c-633e-41e2-8b4b-e3352bf106e1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -89,10 +95,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Levels\0001.level">
-      <Filter>Level Data</Filter>
+      <Filter>Resource Files\Level Data</Filter>
     </None>
     <None Include="Resources\Levels\0002.level">
-      <Filter>Level Data</Filter>
+      <Filter>Resource Files\Level Data</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -102,31 +108,36 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Graphics\background.bmp">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Graphics</Filter>
     </Image>
     <Image Include="Resources\Graphics\brick000.bmp">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Graphics</Filter>
     </Image>
     <Image Include="Resources\Graphics\brick001.bmp">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Graphics</Filter>
     </Image>
     <Image Include="Resources\Graphics\brick002.bmp">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Graphics</Filter>
     </Image>
     <Image Include="Resources\Graphics\brick003.bmp">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Graphics</Filter>
     </Image>
     <Image Include="Resources\Graphics\brick004.bmp">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Graphics</Filter>
     </Image>
     <Image Include="Resources\Graphics\brick005.bmp">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Graphics</Filter>
     </Image>
     <Image Include="Resources\Graphics\brick006.bmp">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Graphics</Filter>
     </Image>
     <Image Include="Resources\Graphics\paddle.bmp">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Graphics</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Resources\Sounds\allpass-glitch-22.wav">
+      <Filter>Resource Files\Sounds</Filter>
+    </Media>
   </ItemGroup>
 </Project>

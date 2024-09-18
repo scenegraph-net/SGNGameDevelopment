@@ -401,6 +401,8 @@ void Game::CheckForPaddleCollisions(std::vector<Collision>& collisions, const gl
 
 void Game::HandleImpact(const Collision& impact)
 {
+   PlaySound(reinterpret_cast<LPCSTR>(IDR_WAVE_IMPACT), GetModuleHandle(nullptr), SND_RESOURCE | SND_ASYNC);
+
    switch (impact.Type)
    {
       case CollisionType::Brick:
