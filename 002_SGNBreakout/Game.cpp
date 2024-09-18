@@ -41,7 +41,7 @@ struct BrickEntry
 
 
 Game::Game(HWND windowHandle)
-   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), CurrentAppState(AppState::INIT), CurrentLevelIndex(0),
+   : Surface(windowHandle), WindowHandle(windowHandle), MousePosition({ }), CurrentAppState(AppState::Init), CurrentLevelIndex(0),
    MainWindowDrawManager(IDB_BITMAP_BACKGROUND, IDB_BITMAP_PADDLE)
 {
    SetupBrickTypes();
@@ -55,7 +55,7 @@ Game::Game(HWND windowHandle)
    PlayerPaddle.Extent.GetUpperLeft().y = static_cast<float>(WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT) - Paddle::HEIGHT;
    PlayerPaddle.Extent.GetLowerRight().y = static_cast<float>(WINDOW_TOP_MARGIN + PLAYING_FIELD_HEIGHT);
 
-   ChangeAppState(AppState::READY);
+   ChangeAppState(AppState::Ready);
 }
 
 
@@ -167,18 +167,18 @@ void Game::MouseClick()
 {
    switch (CurrentAppState)
    {
-      case AppState::READY:
-         ChangeAppState(AppState::PLAYING);
+      case AppState::Ready:
+         ChangeAppState(AppState::Playing);
          break;
-      case AppState::LOST:
+      case AppState::Lost:
          ResetScore();
          LoadLevel();
-         ChangeAppState(AppState::READY);
+         ChangeAppState(AppState::Ready);
          break;
-      case AppState::LEVEL_COMPLETED:
+      case AppState::LevelCompleted:
          CurrentLevelIndex++;
          LoadLevel();
-         ChangeAppState(AppState::READY);
+         ChangeAppState(AppState::Ready);
          break;
    }
 }
@@ -194,21 +194,21 @@ void Game::Update(double frameTime)
 
    switch (CurrentAppState)
    {
-      case AppState::PLAYING:
+      case AppState::Playing:
          UpdateGameState(frameTime);
          DrawGameEntities(surfaceContext);
          DrawPlayerScore(surfaceContext);
          break;
-      case AppState::READY:
+      case AppState::Ready:
          UpdateGameState(frameTime);
          DrawGameEntities(surfaceContext);
          DrawPlayerScore(surfaceContext);
          DrawReadyMessage(surfaceContext);
          break;
-      case AppState::LEVEL_COMPLETED:
+      case AppState::LevelCompleted:
          DrawLevelCompletedMessage(surfaceContext);
          break;
-      case AppState::LOST:
+      case AppState::Lost:
          DrawGameEntities(surfaceContext);
          DrawGameOverMessage(surfaceContext);
          break;
@@ -233,7 +233,7 @@ void Game::UpdateGameState(double frameTime)
    double remainingTime = frameTime;
    std::vector<Collision> collisions;
 
-   while (remainingTime > .0 && AppState::PLAYING == CurrentAppState)
+   while (remainingTime > .0 && AppState::Playing == CurrentAppState)
    {
       glm::vec2 newBallPosition = {
          PlayerBall.Position.x + static_cast<FLOAT>(PlayerBall.Velocity.x * remainingTime),
@@ -455,7 +455,7 @@ void Game::HandleWallCollision(CollisionSide side)
          PlayerBall.Velocity.y *= -1.f;
          break;
       case CollisionSide::Bottom:
-         ChangeAppState((--PlayerLives == 0) ? AppState::LOST : AppState::READY);
+         ChangeAppState((--PlayerLives == 0) ? AppState::Lost : AppState::Ready);
          break;
    }
 }
@@ -468,21 +468,21 @@ void Game::BrickImpact(Brick& brick)
    CurrentLevel->ActiveBrickCount--;
 
    if (0 == CurrentLevel->ActiveBrickCount)
-      ChangeAppState(AppState::LEVEL_COMPLETED);
+      ChangeAppState(AppState::LevelCompleted);
 }
 
 
 void Game::ChangeAppState(AppState newAppState)
 {
-   if (newAppState == CurrentAppState || AppState::INIT == newAppState) // Transitioning back to INIT is not allowed
+   if (newAppState == CurrentAppState || AppState::Init == newAppState) // Transitioning back to Init is not allowed
       return;
 
    CurrentAppState = newAppState;
 
-   if (AppState::READY == CurrentAppState)
+   if (AppState::Ready == CurrentAppState)
       ResetBall();
 
-   if (AppState::PLAYING == CurrentAppState)
+   if (AppState::Playing == CurrentAppState)
       while (ShowCursor(FALSE) >= 0);
    else
       ShowCursor(TRUE);

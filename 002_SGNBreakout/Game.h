@@ -14,11 +14,11 @@
 
 enum class AppState
 {
-   INIT,
-   READY,
-   PLAYING,
-   LEVEL_COMPLETED,
-   LOST,
+   Init,
+   Ready,
+   Playing,
+   LevelCompleted,
+   Lost,
 };
 
 
