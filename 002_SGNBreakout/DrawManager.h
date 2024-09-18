@@ -15,6 +15,18 @@ struct Paddle;
 class Box2D;
 
 
+enum class TextType
+{
+   GameMessage,
+   ScoreHeader,
+   ScoreValue,
+   LivesHeader,
+   LivesValue,
+   LevelHeader,
+   LevelValue
+};
+
+
 class DrawManager
 {
    public:
@@ -25,14 +37,26 @@ class DrawManager
       void DrawBackground(HDC deviceContext, const RECT& extent) const;
       void DrawBrick(HDC deviceContext, const Brick& brick);
       void DrawPaddle(HDC deviceContext, const Paddle& paddle);
+      void DrawString(HDC deviceContext, TextType textType, const std::string& text);
 
       static void DrawBall(HDC deviceContext, const glm::vec2& ballPosition);
-      static void DrawString(HDC deviceContext, const glm::vec2& position, const std::string& text);
 
    private:
       BitmapImage BackgroundImage;
       BitmapImage PaddleImage;
       std::vector<BitmapImage> BrickImages;
+
+      HFONT GameMessageFont;
+      HFONT NumericHeaderFont;
+      HFONT NumericValueFont;
+
+      RECT GameMessageRect;
+      RECT ScoreHeaderRect;
+      RECT ScoreValueRect;
+      RECT LivesHeaderRect;
+      RECT LivesValueRect;
+      RECT LevelHeaderRect;
+      RECT LevelValueRect;
 
       static void ConvertFromBox2D(const Box2D& source, RECT& out_target);
 };

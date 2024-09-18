@@ -197,12 +197,12 @@ void Game::Update(double frameTime)
       case AppState::Playing:
          UpdateGameState(frameTime);
          DrawGameEntities(surfaceContext);
-         DrawPlayerScore(surfaceContext);
+         DrawPlayerStats(surfaceContext);
          break;
       case AppState::Ready:
          UpdateGameState(frameTime);
          DrawGameEntities(surfaceContext);
-         DrawPlayerScore(surfaceContext);
+         DrawPlayerStats(surfaceContext);
          DrawReadyMessage(surfaceContext);
          break;
       case AppState::LevelCompleted:
@@ -276,29 +276,33 @@ void Game::DrawGameEntities(HDC surfaceContext)
 }
 
 
-void Game::DrawPlayerScore(HDC surfaceContext)
+void Game::DrawPlayerStats(HDC surfaceContext)
 {
-   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 50.f), std::format("Score:\n{}", PlayerScore));
-   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 150.f), std::format("Lives:\n{}", PlayerLives));
+   MainWindowDrawManager.DrawString(surfaceContext, TextType::ScoreHeader, "Score");
+   MainWindowDrawManager.DrawString(surfaceContext, TextType::ScoreValue, std::format("{}", PlayerScore));
+   MainWindowDrawManager.DrawString(surfaceContext, TextType::LivesHeader, "Lives");
+   MainWindowDrawManager.DrawString(surfaceContext, TextType::LivesValue, std::format("{}", PlayerLives));
+   MainWindowDrawManager.DrawString(surfaceContext, TextType::LevelHeader, "Level");
+   MainWindowDrawManager.DrawString(surfaceContext, TextType::LevelValue, std::format("{}", CurrentLevelIndex));
 }
 
 
 void Game::DrawReadyMessage(HDC surfaceContext)
 {
-   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 250.f), "Click left mouse button to start!");
+   MainWindowDrawManager.DrawString(surfaceContext, TextType::GameMessage, "Click left mouse button to start!");
 }
 
 
 void Game::DrawLevelCompletedMessage(HDC surfaceContext)
 {
-   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 250.f), 
+   MainWindowDrawManager.DrawString(surfaceContext, TextType::GameMessage, 
       "Level completed!\nClick left mouse button\n to start next level!");
 }
 
 
 void Game::DrawGameOverMessage(HDC surfaceContext)
 {
-   DrawManager::DrawString(surfaceContext, glm::vec2(800.f, 50.f), 
+   MainWindowDrawManager.DrawString(surfaceContext, TextType::GameMessage,
       std::format("GAME OVER!\nFinal score: {}\n\nClick left mouse button\nto start a new game!", PlayerScore));
 }
 

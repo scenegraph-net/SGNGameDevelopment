@@ -65,7 +65,7 @@ class Game
 
       void UpdateGameState(double frameTime);
       void DrawGameEntities(HDC surfaceContext);
-      void DrawPlayerScore(HDC surfaceContext);
+      void DrawPlayerStats(HDC surfaceContext);
       void DrawReadyMessage(HDC surfaceContext);
       void DrawGameOverMessage(HDC surfaceContext);
       void DrawLevelCompletedMessage(HDC surfaceContext);

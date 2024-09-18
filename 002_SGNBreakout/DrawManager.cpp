@@ -9,6 +9,23 @@ DrawManager::DrawManager(int backgroundBitmapResourceId, int paddleBitmapResourc
    HINSTANCE instance = GetModuleHandle(nullptr);
    BackgroundImage.LoadFromResource(instance, backgroundBitmapResourceId);
    PaddleImage.LoadFromResource(instance, paddleBitmapResourceId);
+
+   GameMessageFont = CreateFont(24, 12, 0, 0, FW_REGULAR, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS,
+      CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Arial");
+
+   NumericHeaderFont = CreateFont(16, 8, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS,
+      CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Arial");
+
+   NumericValueFont = CreateFont(30, 16, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS,
+      CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Arial");
+
+   GameMessageRect = { 25, 285, 745, 381 };
+   ScoreHeaderRect = { 817, 73, 961, 105 };
+   ScoreValueRect = { 817, 99, 961, 165 };;
+   LivesHeaderRect = { 817, 193, 961, 225 };;
+   LivesValueRect = { 817, 219, 961, 285 };;
+   LevelHeaderRect = { 817, 313, 961, 345 };;
+   LevelValueRect = { 817, 339, 961, 405 };;
 }
 
 
@@ -54,11 +71,60 @@ void DrawManager::DrawBall(HDC deviceContext, const glm::vec2& ballPosition)
 }
 
 
-void DrawManager::DrawString(HDC deviceContext, const glm::vec2& position, const std::string& text)
+void DrawManager::DrawString(HDC deviceContext, TextType textType, const std::string& text)
 {
-   RECT rectangle{ static_cast<int>(position.x), static_cast<int>(position.y), 0, 0 };
-   DrawText(deviceContext, text.c_str(), static_cast<int>(text.size()), &rectangle, DT_CALCRECT);
-   DrawText(deviceContext, text.c_str(), static_cast<int>(text.size()), &rectangle, 0);
+   RECT* textRectangle = nullptr;
+   HFONT textFont = nullptr;
+   UINT textFormat = 0;
+
+   switch (textType)
+   {
+      case TextType::GameMessage:
+         textRectangle = &GameMessageRect;
+         textFont = GameMessageFont;
+         textFormat = DT_CENTER;
+         break;
+      case TextType::ScoreHeader:
+         textRectangle = &ScoreHeaderRect;
+         textFont = NumericHeaderFont;
+         textFormat = DT_LEFT;
+         break;
+      case TextType::ScoreValue:
+         textRectangle = &ScoreValueRect;
+         textFont = NumericValueFont;
+         textFormat = DT_LEFT;
+         break;
+      case TextType::LivesHeader:
+         textRectangle = &LivesHeaderRect;
+         textFont = NumericHeaderFont;
+         textFormat = DT_LEFT;
+         break;
+      case TextType::LivesValue:
+         textRectangle = &LivesValueRect;
+         textFont = NumericValueFont;
+         textFormat = DT_LEFT;
+         break;
+      case TextType::LevelHeader:
+         textRectangle = &LevelHeaderRect;
+         textFont = NumericHeaderFont;
+         textFormat = DT_LEFT;
+         break;
+      case TextType::LevelValue:
+         textRectangle = &LevelValueRect;
+         textFont = NumericValueFont;
+         textFormat = DT_LEFT;
+         break;
+   }
+
+   COLORREF oldColor = SetTextColor(deviceContext, RGB(255, 255, 255));
+   int oldBackgroundMode = SetBkMode(deviceContext, TRANSPARENT);
+   HFONT oldFont = static_cast<HFONT>(SelectObject(deviceContext, textFont));
+
+   DrawText(deviceContext, text.c_str(), static_cast<int>(text.length()), textRectangle, textFormat);
+
+   SelectObject(deviceContext, oldFont);
+   SetBkMode(deviceContext, oldBackgroundMode);
+   SetTextColor(deviceContext, oldColor);
 }
 
 
