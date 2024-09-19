@@ -24,6 +24,9 @@ static constexpr int INITIAL_PLAYER_LIVES = 3;
 static constexpr int BRICK_WIDTH = 48;
 static constexpr int BRICK_HEIGHT = 24;
 
+static constexpr int BALL_INITIAL_SPEED = 200;
+static constexpr int BALL_SPEED_INCREMENT = 10;
+
 static constexpr RECT BALL_AREA =
 {
    static_cast<LONG>(WINDOW_LEFT_MARGIN + Ball::RADIUS),
@@ -79,7 +82,10 @@ void Game::SetupBrickTypes()
 void Game::ResetBall()
 {
    PlayerBall.Position = { 200.f, 400.f };
-   PlayerBall.Velocity = { 150.f, 150.f };
+   PlayerBall.Direction = { 1.f, 1.f };
+   PlayerBall.Speed = static_cast<float>(BALL_INITIAL_SPEED) + CurrentLevelIndex * static_cast<float>(BALL_SPEED_INCREMENT);
+
+   AdjustBallDirection();
 }
 
 
@@ -248,8 +254,8 @@ void Game::UpdateGameState(double frameTime)
    while (remainingTime > .0 && AppState::Playing == CurrentAppState)
    {
       glm::vec2 newBallPosition = {
-         PlayerBall.Position.x + static_cast<FLOAT>(PlayerBall.Velocity.x * remainingTime),
-         PlayerBall.Position.y + static_cast<FLOAT>(PlayerBall.Velocity.y * remainingTime)
+         PlayerBall.Position.x + static_cast<FLOAT>(PlayerBall.Direction.x * PlayerBall.Speed * remainingTime),
+         PlayerBall.Position.y + static_cast<FLOAT>(PlayerBall.Direction.y * PlayerBall.Speed * remainingTime)
       };
 
       CheckForWallCollisions(collisions, newBallPosition);
@@ -267,7 +273,7 @@ void Game::UpdateGameState(double frameTime)
 
       const Collision& impact = collisions.front();
       const double collisionTime = remainingTime * impact.ImpactTime;
-      PlayerBall.Position += PlayerBall.Velocity * static_cast<float>(collisionTime);
+      PlayerBall.Position += PlayerBall.Direction * PlayerBall.Speed * static_cast<float>(collisionTime);
       remainingTime -= collisionTime;
 
       HandleImpact(impact);
@@ -328,7 +334,7 @@ void Game::DrawGameOverMessage(HDC surfaceContext)
 
 void Game::CheckForWallCollisions(std::vector<Collision>& collisions, const glm::vec2& newBallPosition) const
 {
-   if (PlayerBall.Velocity.x < .0)
+   if (PlayerBall.Direction.x < .0)
    {
       if (newBallPosition.x < BALL_AREA.left)
       {
@@ -345,7 +351,7 @@ void Game::CheckForWallCollisions(std::vector<Collision>& collisions, const glm:
       }
    }
 
-   if (PlayerBall.Velocity.y < .0)
+   if (PlayerBall.Direction.y < .0)
    {
       if (newBallPosition.y < BALL_AREA.top)
       {
@@ -416,6 +422,19 @@ void Game::HandleImpact(const Collision& impact)
          HandleWallCollision(impact.Side);
          break;
    }
+
+   AdjustBallDirection();
+}
+
+
+void Game::AdjustBallDirection()
+{
+   constexpr float MINIMUM_VERTICAL_COMPONENT = .1f;
+
+   if (std::abs(PlayerBall.Direction.y) < MINIMUM_VERTICAL_COMPONENT)
+      PlayerBall.Direction.y = (PlayerBall.Direction.y > .0f) ? MINIMUM_VERTICAL_COMPONENT : -MINIMUM_VERTICAL_COMPONENT;
+
+   PlayerBall.Direction = glm::normalize(PlayerBall.Direction);
 }
 
 
@@ -425,19 +444,19 @@ void Game::HandleRectangleCollision(const Box2D& extent, CollisionSide side)
    {
       case CollisionSide::Bottom:
          PlayerBall.Position.y = extent.GetLowerRight().y + Ball::RADIUS;
-         PlayerBall.Velocity.y *= -1.f;
+         PlayerBall.Direction.y *= -1.f;
          break;
       case CollisionSide::Left:
          PlayerBall.Position.x = extent.GetUpperLeft().x - Ball::RADIUS;
-         PlayerBall.Velocity.x *= -1.f;
+         PlayerBall.Direction.x *= -1.f;
          break;
       case CollisionSide::Right:
          PlayerBall.Position.x = extent.GetLowerRight().x + Ball::RADIUS;
-         PlayerBall.Velocity.x *= -1.f;
+         PlayerBall.Direction.x *= -1.f;
          break;
       case CollisionSide::Top:
          PlayerBall.Position.y = extent.GetUpperLeft().y - Ball::RADIUS;
-         PlayerBall.Velocity.y *= -1.f;
+         PlayerBall.Direction.y *= -1.f;
          break;
       case CollisionSide::BottomLeft:
          PointBounce(glm::vec2(extent.GetUpperLeft().x, extent.GetLowerRight().y));
@@ -459,7 +478,7 @@ void Game::PointBounce(const glm::vec2& point)
 {
    const glm::vec2 pointToBallDirection = glm::normalize(PlayerBall.Position - point);
    PlayerBall.Position = point + pointToBallDirection * Ball::RADIUS;
-   PlayerBall.Velocity = glm::reflect(PlayerBall.Velocity, pointToBallDirection);
+   PlayerBall.Direction = glm::reflect(PlayerBall.Direction, pointToBallDirection);
 }
 
 
@@ -469,15 +488,15 @@ void Game::HandleWallCollision(CollisionSide side)
    {
       case CollisionSide::Left:
          PlayerBall.Position.x = static_cast<float>(BALL_AREA.left);
-         PlayerBall.Velocity.x *= -1.f;
+         PlayerBall.Direction.x *= -1.f;
          break;
       case CollisionSide::Right:
          PlayerBall.Position.x = static_cast<float>(BALL_AREA.right);
-         PlayerBall.Velocity.x *= -1.f;
+         PlayerBall.Direction.x *= -1.f;
          break;
       case CollisionSide::Top:
          PlayerBall.Position.y = static_cast<float>(BALL_AREA.top);
-         PlayerBall.Velocity.y *= -1.f;
+         PlayerBall.Direction.y *= -1.f;
          break;
       case CollisionSide::Bottom:
          ChangeAppState((--PlayerLives == 0) ? AppState::Lost : AppState::Ready);

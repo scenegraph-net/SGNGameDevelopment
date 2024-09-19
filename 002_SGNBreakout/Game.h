@@ -64,6 +64,8 @@ class Game
       void ResetBall();
       void ResetScore();
 
+      void AdjustBallDirection();
+
       void UpdateGameState(double frameTime);
       void DrawGameEntities(HDC surfaceContext);
       void DrawPlayerStats(HDC surfaceContext);

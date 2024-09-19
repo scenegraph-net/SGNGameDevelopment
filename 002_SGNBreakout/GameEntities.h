@@ -45,8 +45,10 @@ struct Ball
 {
    static constexpr float RADIUS = 8.f;
 
+   float Speed;
+
    glm::vec2 Position;
-   glm::vec2 Velocity;
+   glm::vec2 Direction;
 };
 
 
